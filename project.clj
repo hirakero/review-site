@@ -38,7 +38,8 @@
                                    [hawk "0.2.11"]
                                    [integrant/repl "0.3.2"]
                                    [kerodon "0.9.1"]
-                                   [mvxcvi/cljstyle "0.15.0" :exclusions [org.clojure/clojure]]]
+                                   [mvxcvi/cljstyle "0.15.0" :exclusions [org.clojure/clojure]]
+                                   [ring/ring-mock "0.4.0"]]
                   :aliases {"idiom:check" ["do"
                                            ["eastwood"]
                                            ["run" "-m" "clj-kondo.main" "--lint" "src" "test"]
