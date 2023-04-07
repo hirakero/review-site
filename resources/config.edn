@@ -12,9 +12,13 @@
   
   :duct.router/reitit
   {:routes [["/" {:get #ig/ref :isomorphic-clojure-webapp.handler.app/index}]
-            ["/app/*" {:get #ig/ref :isomorphic-clojure-webapp.handler.app/index}]]}
+            ["/app/*" {:get #ig/ref :isomorphic-clojure-webapp.handler.app/index}]
+            ["/users" {:post #ig/ref :isomorphic-clojure-webapp.handler.users/create}]
+            ["/users/:id" {:get #ig/ref :isomorphic-clojure-webapp.handler.users/fetch}]]}
 
-  :isomorphic-clojure-webapp.handler.app/index {}}
+  :isomorphic-clojure-webapp.handler.app/index {}
+  :isomorphic-clojure-webapp.handler.users/create {}
+  :isomorphic-clojure-webapp.handler.users/fetch {}}
 
  :duct.profile/dev   #duct/include "dev"
  :duct.profile/local #duct/include "local"
