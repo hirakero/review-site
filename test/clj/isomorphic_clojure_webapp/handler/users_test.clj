@@ -4,7 +4,7 @@
             [integrant.core :as ig]
             [integrant.repl.state :refer [system config]]
             [shrubbery.core :as shrubbery]
-            [isomorphic-clojure-webapp.boudary.users :as users]))
+            [isomorphic-clojure-webapp.boundary.users :as users]))
 
 (def database-stub
   (shrubbery/stub users/Users
