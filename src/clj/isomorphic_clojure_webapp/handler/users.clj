@@ -20,3 +20,26 @@
          :body {:errors (:errors result) }}
         {:status 200
          :body result}))))
+
+
+(defmethod ig/init-key ::update [_ {:keys [db]}]
+  (fn [req]
+    (let [id (get-in req [:path-params :id])
+          values (:body-params req) 
+          {:keys [id errors] :as result} (users/update-user db id values)] 
+      (println "\nresult " result)
+      (if errors
+        {:status 404
+         :body {:errors errors}}
+        {:status 200
+         :body {:id id}}))))
+
+(defmethod ig/init-key ::delete [_ {:keys [db]}]
+  (fn [req]
+    (let [id (get-in req [:path-params :id])
+          result (users/delete-user db id)]
+      (if (:errors result) 
+        {:status 404
+         :body {:errors (:errors result)}}
+        {:status 204
+         :body {}}))))

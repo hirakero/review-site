@@ -2,6 +2,6 @@
 
 (defprotocol Users
   (get-user-by-id [db id])
-  (create-user [db values]))
-
-
+  (create-user [db values])
+  (update-user [db id values])
+  (delete-user [db id]))

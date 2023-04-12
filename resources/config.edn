@@ -8,17 +8,22 @@
                                                           :max-age 3600}}
                                  :params {:urlencoded true
                                           :multipart true}
-                                 :responses {:absolute-redirects true}} 
-  
+                                 :responses {:absolute-redirects true}}
+
   :duct.router/reitit
   {:routes [["/" {:get #ig/ref :isomorphic-clojure-webapp.handler.app/index}]
             ["/app/*" {:get #ig/ref :isomorphic-clojure-webapp.handler.app/index}]
             ["/users" {:post #ig/ref :isomorphic-clojure-webapp.handler.users/create}]
-            ["/users/:id" {:get #ig/ref :isomorphic-clojure-webapp.handler.users/fetch}]]}
+            ["/users/:id" {:get #ig/ref :isomorphic-clojure-webapp.handler.users/fetch
+                           :update #ig/ref :isomorphic-clojure-webapp.handler.users/update
+                           :delete #ig/ref :isomorphic-clojure-webapp.handler.users/delete}]]}
 
   :isomorphic-clojure-webapp.handler.app/index {}
   :isomorphic-clojure-webapp.handler.users/create {}
-  :isomorphic-clojure-webapp.handler.users/fetch {}}
+  :isomorphic-clojure-webapp.handler.users/fetch {}
+  :isomorphic-clojure-webapp.handler.users/update {}
+  :isomorphic-clojure-webapp.handler.users/delete {}
+}
 
  :duct.profile/dev   #duct/include "dev"
  :duct.profile/local #duct/include "local"
