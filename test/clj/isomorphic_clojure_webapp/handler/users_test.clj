@@ -4,12 +4,22 @@
             [integrant.core :as ig]
             [integrant.repl.state :refer [system config]]
             [shrubbery.core :as shrubbery]
+            [mockfn.macros :as mfn]
+            [duct.database.sql]
             [isomorphic-clojure-webapp.boundary.users :as users]))
 
 (def database-stub
   (shrubbery/stub users/Users
-                  {:get-user-by-id {:id 1 :name "Alice"}
-                   :create-user {:user-id 1}}))
+                  {:create-user {:id 1}
+                   :get-user-by-id {:id 1 :name "Alice"}}))
+
+(def database-stub-incorrect-data 
+  (shrubbery/stub users/Users
+                  {:create-user {:errors [{:code 1001 :message "incorrect data"}]}
+                   :get-user-by-id {:errors [{:code 1001 :message "incorrect data"}]}}))
+(def database-stub-not-found
+  (shrubbery/stub users/Users
+                  {:get-user-by-id {:errors [{:code 1002 :message "not found"}]}}))
 
 (defn get-key [config {:keys [request-method uri]}] 
   (-> config
@@ -20,20 +30,36 @@
       (second)
       request-method
       :key))
-(get-key config {:request-method :get :uri "/users/1"} )
 
 (deftest users-handler-test
-  (testing "create user" 
-    (let [request (-> (mock/request :post "/users")
-                      (mock/json-body {:name "Alice"}))
-          key (get-key config request)
-          handler (ig/init-key key {:db database-stub})
-          {:keys [status body]} (handler request)]
-      (is (= 201 status))
-      (is (= 1 (:user-id body))))) 
+  (testing "create user"
+    (testing "正常"
+      (let [request (-> (mock/request :post "/users")
+                        (mock/json-body {:name "Alice"}))
+            key (get-key config request)
+            handler (ig/init-key key {:db database-stub})
+            {:keys [status body]} (handler request)]
+        (is (= 201 status))
+        (is (= 1 (:id body))))) 
+    (testing "データが不正"
+      (let [request (-> (mock/request :post "/users")
+                        (mock/json-body {}))
+            key (get-key config request)
+            handler (ig/init-key key {:db database-stub-incorrect-data})
+            {:keys [status body]} (handler request)]
+        (is (= 400 status))
+        (is (= "incorrect data" (-> body :errors first :message))))))
+  
   (testing "fetch user"
-    (let [request (mock/request :get "/users/1")
-          handler (ig/init-key :isomorphic-clojure-webapp.handler.users/fetch {:db database-stub})
-          {:keys [status body]} (handler request)]
-      (is (= 200 status))
-      (is (= {:id 1 :name "Alice"} body)))))
+    (testing "正常"
+      (let [request (mock/request :get "/users/1")
+            handler (ig/init-key :isomorphic-clojure-webapp.handler.users/fetch {:db database-stub})
+            {:keys [status body]} (handler request)]
+        (is (= 200 status))
+        (is (= {:id 1 :name "Alice"} body))))
+    (testing "データが見つからない"
+      (let [request (mock/request :get "/users/10")
+            handler (ig/init-key :isomorphic-clojure-webapp.handler.users/fetch {:db database-stub-not-found})
+            {:keys [status body]} (handler request)]
+        (is (= 404 status))
+        (is (= "not found" (-> body :errors first :message)))))))

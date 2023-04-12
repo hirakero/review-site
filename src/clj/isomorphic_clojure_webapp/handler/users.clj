@@ -4,14 +4,19 @@
 
 (defmethod ig/init-key ::create [_ {:keys [db]}]
   (fn [req]
-    (let [{:keys [user-id]} (users/create-user db {})]
-      {:status 201
-       :body {:user-id user-id}})))
+    (let [{:keys [id errors] :as result} (users/create-user db (:body req))] 
+      (if errors 
+        {:status 400
+         :body {:errors errors}}
+        {:status 201
+         :body {:id id}}))))
 
 (defmethod ig/init-key ::fetch [_ {:keys [db]}]
   (fn [req] 
-    (let [id (get-in req [:path-params :id])]
-      (if-let [user (users/get-user-by-id db id)]
+    (let [id (get-in req [:path-params :id])
+          result (users/get-user-by-id db id)]
+      (if (:errors result) 
+        {:status 404
+         :body {:errors (:errors result) }}
         {:status 200
-         :body user}
-        {:status 404}))))
+         :body result}))))
