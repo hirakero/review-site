@@ -23,6 +23,13 @@
   :isomorphic-clojure-webapp.handler.users/fetch {}
   :isomorphic-clojure-webapp.handler.users/update {}
   :isomorphic-clojure-webapp.handler.users/delete {}
+  
+  :duct.migrator/ragtime {:migrations [#ig/ref :review-site.migration/create-users-table]}
+
+[:duct.migrator.ragtime/sql :review-site.migration/create-users-table]
+{:up ["CREATE TABLE users (id SERIAL PRIMARY KEY, 
+                             name VARCHAR(128) NOT NULL);"]
+ :down ["DROP TABLE users;"]}
 }
 
  :duct.profile/dev   #duct/include "dev"
