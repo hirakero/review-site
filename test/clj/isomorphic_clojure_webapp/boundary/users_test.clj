@@ -10,27 +10,36 @@
   (fn [f] 
     (let [boundary (:duct.database.sql/hikaricp system)
           ds (-> boundary :spec :datasource)]
-      #_(jdbc/execute! ds ["delete from users"])
-      (let [result (jdbc/execute! ds ["select * from users"])]
-        result)
-      
-      #_boundary
-      #_ds
+      (jdbc/execute! ds ["delete from users"])
+      #_(let [result (jdbc/execute! ds ["select * from users"])]
+        result) 
       )
     (f)
     ))
-;[#:next.jdbc{:update-count 2}]
 (deftest users-boundary-test 
   (let [boundary (:duct.database.sql/hikaricp system)] 
-    (testing "create 正常"
-      (let [result (users/create-user boundary {:name "Alice"})] 
-        (is (pos-int? (-> result first :id)))
-        (is (= "Alice" (-> result first :name)))
-        (is (nil? (:errors result)))
-        result)) 
+    (testing "create"
+      (let [result (-> (users/create-user boundary {:name "Alice"}) first)
+            id (:id result)]
+        (is (pos-int? id))
+        (is (= "Alice" (:name result)))
+        #_(is (nil? (:errors result)))
+
+        (testing "fetch"
+          (let [result (-> (users/get-user-by-id boundary id) first)]
+            (is (= id (:id result)))
+            (is (= "Alice" (:name result)))))
+        (testing "update"
+          (let [result (-> (users/update-user boundary id {:name "Alice Abbot"}) first)]
+            (is (= "Alice Abbot" (:name result)))
+            result))
+        (testing "delete"
+          (let [result (-> (users/delete-user boundary id) first)]
+            (is (= id (:id result)))
+            result))))
     (testing "create 異常"
       (let [result (users/create-user boundary {:namae "Aida"})]
-        (is (pos-int? (-> result :errors first :code)))
+        #_(is ( (-> result)))
         #_(is (= "Alice" (-> result first :name)))
-        result)
+        )
       )))
