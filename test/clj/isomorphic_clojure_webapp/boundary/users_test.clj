@@ -5,17 +5,23 @@
             [duct.database.sql]
             [next.jdbc :as jdbc]))
 
-
 (use-fixtures :each
   (fn [f] 
     (let [boundary (:duct.database.sql/hikaricp system)
           ds (-> boundary :spec :datasource)]
-      (jdbc/execute! ds ["delete from users"])
-      #_(let [result (jdbc/execute! ds ["select * from users"])]
-        result) 
-      )
-    (f)
-    ))
+      (jdbc/execute! ds ["delete from users"]))
+    (f)))
+
+(comment
+  (#(let [boundary (:duct.database.sql/hikaricp system)
+          ds (-> boundary :spec :datasource)]
+
+      (let [result (jdbc/execute! ds [%])]
+        result))
+   "select * from users"
+   #_"insert into users (name) values ('Bob')")
+  )
+
 (deftest users-boundary-test 
   (let [boundary (:duct.database.sql/hikaricp system)] 
     (testing "create"

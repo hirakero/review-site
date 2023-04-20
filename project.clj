@@ -42,7 +42,8 @@
                                    [mvxcvi/cljstyle "0.15.0" :exclusions [org.clojure/clojure]]
                                    [ring/ring-mock "0.4.0"]
                                    [com.gearswithingears/shrubbery "0.4.1"]
-                                   [nubank/mockfn "0.7.0"]]
+                                   [nubank/mockfn "0.7.0"]
+                                   [clj-http "3.12.3"]]
                   :aliases {"idiom:check" ["do"
                                            ["eastwood"]
                                            ["run" "-m" "clj-kondo.main" "--lint" "src" "test"]
