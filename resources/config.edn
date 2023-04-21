@@ -13,16 +13,18 @@
   :duct.router/reitit
   {:routes [["/" {:get #ig/ref :isomorphic-clojure-webapp.handler.app/index}]
             ["/app/*" {:get #ig/ref :isomorphic-clojure-webapp.handler.app/index}]
-            ["/users" {:post #ig/ref :isomorphic-clojure-webapp.handler.users/create}]
-            ["/users/:id" {:get #ig/ref :isomorphic-clojure-webapp.handler.users/fetch
+            ["/users" {:get #ig/ref :isomorphic-clojure-webapp.handler.users/all
+                       :post #ig/ref :isomorphic-clojure-webapp.handler.users/create}]
+            ["/users/:id" {:get #ig/ref :isomorphic-clojure-webapp.handler.users/fetch 
                            :update #ig/ref :isomorphic-clojure-webapp.handler.users/update
                            :delete #ig/ref :isomorphic-clojure-webapp.handler.users/delete}]]}
 
   :isomorphic-clojure-webapp.handler.app/index {}
-  :isomorphic-clojure-webapp.handler.users/create {}
-  :isomorphic-clojure-webapp.handler.users/fetch {}
-  :isomorphic-clojure-webapp.handler.users/update {}
-  :isomorphic-clojure-webapp.handler.users/delete {}
+  :isomorphic-clojure-webapp.handler.users/all {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.handler.users/create {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.handler.users/fetch {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.handler.users/update {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.handler.users/delete {:db #ig/ref :duct.database.sql/hikaricp}
   
   :duct.migrator/ragtime {:migrations [#ig/ref :review-site.migration/create-users-table]}
 

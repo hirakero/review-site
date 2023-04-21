@@ -7,6 +7,7 @@
   (:import [java.sql SQLException]))
 
 (defprotocol Users
+  (get-users [db])
   (get-user-by-id [db id])
   (create-user [db values])
   (update-user [db id values])
@@ -17,41 +18,51 @@
 
 (extend-protocol Users
   duct.database.sql.Boundary
-  (get-user-by-id [db id] 
-    (let [ds (-> db :spec :datasource) 
+  (get-users [db]
+             (let [ds (-> db :spec :datasource)
+                   result (jdbc/execute! ds
+                                         ["select * from users"]
+                                         execute-opts)]
+               result))
+
+  (get-user-by-id [db id]
+    (let [ds (-> db :spec :datasource)
           result (jdbc/execute! ds
                                 (sql/format (-> (hh/select :*)
                                                 (hh/from :users)
                                                 (hh/where := :id id)))
                                 execute-opts)]
       result))
-  
-  (create-user [db values] 
+
+  (create-user [db values]
+    (def *values values)
     (try
       (let [ds (-> db :spec :datasource)
+            sql (sql/format (-> (hh/insert-into :users [:name])
+                                (hh/values [[(:name values)]])))
+            _ (def *sql sql)
             result (jdbc/execute! ds
-                                  (sql/format (-> (hh/insert-into :users [:name])
-                                                  (hh/values [[(:name values)]])))
+                                  sql
                                   execute-opts)]
         result)
-      (catch SQLException e         
+      (catch SQLException e
           ;TODO log
           ;TODO ex-info 
         )))
-  
+
   (update-user [db id values]
     (let [ds (-> db :spec :datasource)
-          result (jdbc/execute! ds 
+          result (jdbc/execute! ds
                                 (sql/format (-> (hh/update :users)
                                                 (hh/set {:name (:name values)})
                                                 (hh/where [:= :id id])))
                                 execute-opts)]
       result))
-  
-  (delete-user [db id] 
-               (let [ds (-> db :spec :datasource)
-                     result (jdbc/execute! ds
-                                           (sql/format (-> (hh/delete-from :users)
-                                                           (hh/where [:= :id id])))
-                                           execute-opts)]
-                 result)))
+
+  (delete-user [db id]
+    (let [ds (-> db :spec :datasource)
+          result (jdbc/execute! ds
+                                (sql/format (-> (hh/delete-from :users)
+                                                (hh/where [:= :id id])))
+                                execute-opts)]
+      result)))

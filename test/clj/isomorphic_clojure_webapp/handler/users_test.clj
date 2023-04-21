@@ -1,5 +1,5 @@
 (ns isomorphic-clojure-webapp.handler.users-test
-  (:require [clojure.test :refer [deftest testing is]]
+  (:require [clojure.test :refer [deftest testing is are]]
             [ring.mock.request :as mock]
             [integrant.core :as ig]
             [integrant.repl.state :refer [system config]]
@@ -10,7 +10,8 @@
 
 (def database-stub-normal
   (shrubbery/stub users/Users
-                  {:create-user {:id 1}
+                  {:get-users [{:id 1 :name "Alice"} {:id 2 :name "Bob"}]
+                   :create-user {:id 1}
                    :get-user-by-id {:id 1 :name "Alice"}
                    :update-user {:id 1}
                    :delete-user {}}))
@@ -31,31 +32,28 @@
                    :delete-user {:errors [{:code 1002
                                            :message "not found"}]}}))
 
-(defn get-key [config {:keys [request-method uri]}]
-  (-> config
-      :duct.router/reitit
-      :routes
-      ((fn [v]  (filter #(= (first %) uri) v)))
-      (first)
-      (second)
-      request-method
-      :key))
-
 (deftest users-handler-test
+  (testing "all "
+    (let [request (mock/request :get "/users")
+          handler (ig/init-key :isomorphic-clojure-webapp.handler.users/all
+                               {:db database-stub-normal})
+          {:keys [status body]} (handler request)]
+      (is (= 200 status))
+      (is (= [{:id 1 :name "Alice"} {:id 2 :name "Bob"}] body))))
   (testing "create user"
     (testing "正常"
       (let [request (-> (mock/request :post "/users")
                         (mock/json-body {:name "Alice"}))
-            key (get-key config request)
-            handler (ig/init-key key {:db database-stub-normal})
+            handler (ig/init-key :isomorphic-clojure-webapp.handler.users/create
+                                 {:db database-stub-normal})
             {:keys [status body]} (handler request)]
         (is (= 201 status))
         (is (= 1 (:id body)))))
     (testing "データが不正"
       (let [request (-> (mock/request :post "/users")
-                        (mock/json-body {}))
-            key (get-key config request)
-            handler (ig/init-key key {:db database-stub-incorrect-data})
+                        (mock/json-body {})) 
+            handler (ig/init-key :isomorphic-clojure-webapp.handler.users/create
+                                 {:db database-stub-incorrect-data})
             {:keys [status body]} (handler request)]
         (is (= 400 status))
         (is (= "incorrect data" (-> body :errors first :message))))))

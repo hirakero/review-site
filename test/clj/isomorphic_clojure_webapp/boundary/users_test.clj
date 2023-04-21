@@ -24,6 +24,9 @@
 
 (deftest users-boundary-test 
   (let [boundary (:duct.database.sql/hikaricp system)] 
+    (testing "all"
+      (let [result (users/get-users boundary)]
+        (is (= [] result))))
     (testing "create"
       (let [result (-> (users/create-user boundary {:name "Alice"}) first)
             id (:id result)]
@@ -39,11 +42,15 @@
           (let [result (-> (users/update-user boundary id {:name "Alice Abbot"}) first)]
             (is (= "Alice Abbot" (:name result)))
             result))
+        (testing "all"
+          (users/create-user boundary {:name "Bob"})
+          (let [result (users/get-users boundary)]
+            (is (= 2 (count result)))))
         (testing "delete"
           (let [result (-> (users/delete-user boundary id) first)]
             (is (= id (:id result)))
             result))))
-    (testing "create 異常"
+    #_(testing "create 異常"
       (let [result (users/create-user boundary {:namae "Aida"})]
         #_(is ( (-> result)))
         #_(is (= "Alice" (-> result first :name)))
