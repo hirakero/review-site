@@ -30,7 +30,9 @@
 
 [:duct.migrator.ragtime/sql :review-site.migration/create-users-table]
 {:up ["CREATE TABLE users (id SERIAL PRIMARY KEY, 
-                             name VARCHAR(128) NOT NULL);"]
+                           name TEXT NOT NULL,
+                           email TEXT,
+                           password TEXT);"]
  :down ["DROP TABLE users;"]}
 }
 
