@@ -10,8 +10,6 @@
                :coerce :always
                :throw-exceptions? false}))
 
-
-
 (defn http-post [path body]
   (client/post (str test-url path)
                {:form-params body
@@ -19,9 +17,7 @@
                 :accept :json
                 :as :json
                 :coerce :always
-                :throw-exceptions? false})  )
-
-(http-post "/users"  {:name "Charly"})
+                :throw-exceptions? false}))
 
 (defn http-put [path body]
   (client/put (str test-url path)
