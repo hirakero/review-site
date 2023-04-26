@@ -26,40 +26,43 @@
   {:return-keys true
    :builder-fn rs/as-unqualified-maps})
 
+(defn- get-datasource [d]
+  (-> d :spec :datasource))
+
+(defn- execute-one! [sql db]
+  (let [ds (get-datasource db)]
+    (jdbc/execute-one! ds sql execute-opts)))
+
+(defn- execute! [sql db]
+  (let [ds (get-datasource db)]
+    (jdbc/execute! ds sql execute-opts)))
 
 (extend-protocol Users
   duct.database.sql.Boundary
   (get-users [db]
-    (let [ds (-> db :spec :datasource)
-          result (jdbc/execute! ds
-                                (-> (hh/select :*)
-                                    (hh/from :users)
-                                    (sql/format)) 
-                                execute-opts)
+    (let [result (-> (hh/select :*)
+                     (hh/from :users)
+                     (sql/format)
+                     (execute! db))  
           sanitized-result (map #(dissoc % :password) result)]
       sanitized-result))
 
   (get-user-by-id [db id]
-    (let [ds (-> db :spec :datasource)
-          result (jdbc/execute-one! ds
-                                    (-> (hh/select :*)
-                                        (hh/from :users)
-                                        (hh/where := :id id)
-                                        (sql/format))
-                                    execute-opts)
+    (let [result (-> (hh/select :*)
+                     (hh/from :users)
+                     (hh/where := :id id)
+                     (sql/format)
+                     (execute-one! db))
           sanitized-result (dissoc result :password)]
       sanitized-result))
 
   (create-user [db {:keys [name email password]}]
     (try
-      (let [ds (-> db :spec :datasource)
-            hashed-password (hashers/encrypt password)
-            sql  (-> (hh/insert-into :users [:name :email :password])
-                     (hh/values [[name email hashed-password]])
-                     (sql/format))
-            result (jdbc/execute-one! ds
-                                      sql
-                                      execute-opts)
+      (let [hashed-password (hashers/encrypt password)
+            result (-> (hh/insert-into :users [:name :email :password])
+                       (hh/values [[name email hashed-password]])
+                       (sql/format)
+                       (execute-one! db))
             sanitized-result (dissoc result :password)]
         sanitized-result)
       (catch SQLException e
@@ -69,22 +72,18 @@
         )))
 
   (update-user [db id values]
-    (let [ds (-> db :spec :datasource)
-          result (jdbc/execute-one! ds
-                                    (-> (hh/update :users)
-                                        (hh/set values)
-                                        (hh/where [:= :id id])
-                                        (sql/format))
-                                    execute-opts)
+    (let [result (-> (hh/update :users)
+                     (hh/set values)
+                     (hh/where [:= :id id])
+                     (sql/format)
+                     (execute-one! db))
           sanitized-result (dissoc result :password)]
       sanitized-result))
 
   (delete-user [db id]
-    (let [ds (-> db :spec :datasource)
-          result (jdbc/execute-one! ds
-                                    (-> (hh/delete-from :users)
-                                        (hh/where [:= :id id])
-                                        (sql/format))
-                                    execute-opts)
+    (let [result (-> (hh/delete-from :users)
+                     (hh/where [:= :id id])
+                     (sql/format)
+                     (execute-one! db))
           sanitized-result (dissoc result :password)]
       sanitized-result)))
