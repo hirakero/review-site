@@ -32,7 +32,9 @@
   (get-users [db]
     (let [ds (-> db :spec :datasource)
           result (jdbc/execute! ds
-                                ["select * from users"]
+                                (-> (hh/select :*)
+                                    (hh/from :users)
+                                    (sql/format)) 
                                 execute-opts)
           sanitized-result (map #(dissoc % :password) result)]
       sanitized-result))
@@ -40,9 +42,10 @@
   (get-user-by-id [db id]
     (let [ds (-> db :spec :datasource)
           result (jdbc/execute-one! ds
-                                    (sql/format (-> (hh/select :*)
-                                                    (hh/from :users)
-                                                    (hh/where := :id id)))
+                                    (-> (hh/select :*)
+                                        (hh/from :users)
+                                        (hh/where := :id id)
+                                        (sql/format))
                                     execute-opts)
           sanitized-result (dissoc result :password)]
       sanitized-result))
@@ -51,8 +54,9 @@
     (try
       (let [ds (-> db :spec :datasource)
             hashed-password (hashers/encrypt password)
-            sql (sql/format (-> (hh/insert-into :users [:name :email :password])
-                                (hh/values [[name email hashed-password]])))
+            sql  (-> (hh/insert-into :users [:name :email :password])
+                     (hh/values [[name email hashed-password]])
+                     (sql/format))
             result (jdbc/execute-one! ds
                                       sql
                                       execute-opts)
@@ -67,9 +71,10 @@
   (update-user [db id values]
     (let [ds (-> db :spec :datasource)
           result (jdbc/execute-one! ds
-                                    (sql/format (-> (hh/update :users)
-                                                    (hh/set values)
-                                                    (hh/where [:= :id id])))
+                                    (-> (hh/update :users)
+                                        (hh/set values)
+                                        (hh/where [:= :id id])
+                                        (sql/format))
                                     execute-opts)
           sanitized-result (dissoc result :password)]
       sanitized-result))
@@ -77,8 +82,9 @@
   (delete-user [db id]
     (let [ds (-> db :spec :datasource)
           result (jdbc/execute-one! ds
-                                    (sql/format (-> (hh/delete-from :users)
-                                                    (hh/where [:= :id id])))
+                                    (-> (hh/delete-from :users)
+                                        (hh/where [:= :id id])
+                                        (sql/format))
                                     execute-opts)
           sanitized-result (dissoc result :password)]
       sanitized-result)))
