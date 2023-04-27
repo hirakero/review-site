@@ -33,25 +33,30 @@
     (testing "create"
       (let [result (users/create-user boundary {:name "Alice"
                                                 :email "alice@example.com"
-                                                :password "password"}) 
+                                                :password "password"})
             id (:id result)]
-        (is (pos-int? id))
+
+        (is (= java.util.UUID (type id)))
         (is (= "Alice" (:name result)))
         (is (= "alice@example.com" (:email result)))
-        (is (nil? (:password result)))  
+        (is (nil? (:password result)))
+        (is (not (nil? (:created result))))
+        (is (not (nil? (:updated result))))
 
         (testing "fetch"
           (let [result  (users/get-user-by-id boundary id)]
             (is (= id (:id result)))
             (is (= "Alice" (:name result)))
-            (is (= "alice@example.com" (:email result))) 
-            ( is (nil? (:password result)))
-            ))
+            (is (= "alice@example.com" (:email result)))
+            (is (nil? (:password result)))
+            (is (not (nil? (:created result))))
+            (is (not (nil? (:updated result))))))
+
         (testing "update"
-          (let [result (users/update-user boundary id {:name "Alice Abbot"}) ]
+          (let [result (users/update-user boundary id {:name "Alice Abbot"})]
             (is (= "Alice Abbot"  (:name result)))
             result)
-          (let [result (users/update-user boundary id {:email "a.abbot@example.com"}) ]
+          (let [result (users/update-user boundary id {:email "a.abbot@example.com"})]
             (is (= "a.abbot@example.com"  (:email result)))
             result)
           (let [result (users/update-user boundary id {:name "Alice"
@@ -64,9 +69,9 @@
                                        :password "password"})
           (let [result (users/get-users boundary)]
             (is (= 2 (count result)))
-            (is (empty? (remove #(nil? (:password %)) result))))) 
+            (is (empty? (remove #(nil? (:password %)) result)))))
         (testing "delete"
-          (let [result (users/delete-user boundary id) ]
+          (let [result (users/delete-user boundary id)]
             (is (= id (:id result)))
             (is (nil? (:password result)))))))
     #_(testing "create 異常"

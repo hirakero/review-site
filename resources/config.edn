@@ -13,11 +13,12 @@
   :duct.router/reitit
   {:routes [["/" {:get #ig/ref :isomorphic-clojure-webapp.handler.app/index}]
             ["/app/*" {:get #ig/ref :isomorphic-clojure-webapp.handler.app/index}]
-            ["/users" {:get #ig/ref :isomorphic-clojure-webapp.handler.users/all
-                       :post #ig/ref :isomorphic-clojure-webapp.handler.users/create}]
-            ["/users/:id" {:get #ig/ref :isomorphic-clojure-webapp.handler.users/fetch 
-                           :update #ig/ref :isomorphic-clojure-webapp.handler.users/update
-                           :delete #ig/ref :isomorphic-clojure-webapp.handler.users/delete}]]}
+            ["/users"
+             ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.users/all
+                  :post #ig/ref :isomorphic-clojure-webapp.handler.users/create}]
+             ["/:id" {:get #ig/ref :isomorphic-clojure-webapp.handler.users/fetch
+                      :update #ig/ref :isomorphic-clojure-webapp.handler.users/update
+                      :delete #ig/ref :isomorphic-clojure-webapp.handler.users/delete}]]]}
 
   :isomorphic-clojure-webapp.handler.app/index {}
   :isomorphic-clojure-webapp.handler.users/all {:db #ig/ref :duct.database.sql/hikaricp}
@@ -29,10 +30,12 @@
   :duct.migrator/ragtime {:migrations [#ig/ref :review-site.migration/create-users-table]}
 
 [:duct.migrator.ragtime/sql :review-site.migration/create-users-table]
-{:up ["CREATE TABLE users (id SERIAL PRIMARY KEY, 
+{:up ["CREATE TABLE users (id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
                            name TEXT NOT NULL,
                            email TEXT,
-                           password TEXT);"]
+                           password TEXT,
+                           created TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                           updated TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP);"]
  :down ["DROP TABLE users;"]}
 }
 

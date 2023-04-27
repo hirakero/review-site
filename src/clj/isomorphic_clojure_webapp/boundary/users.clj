@@ -43,7 +43,7 @@
     (let [result (-> (hh/select :*)
                      (hh/from :users)
                      (sql/format)
-                     (execute! db))  
+                     (execute! db))
           sanitized-result (map #(dissoc % :password) result)]
       sanitized-result))
 
@@ -59,10 +59,11 @@
   (create-user [db {:keys [name email password]}]
     (try
       (let [hashed-password (hashers/encrypt password)
-            result (-> (hh/insert-into :users [:name :email :password])
-                       (hh/values [[name email hashed-password]])
+            result (-> (hh/insert-into :users [:name :email :password :created :updated])
+                       (hh/values [[name email hashed-password [:now] [:now]]])
                        (sql/format)
-                       (execute-one! db))
+                       #_(#((println "query " %) %))
+                       (execute-one! db)) 
             sanitized-result (dissoc result :password)]
         sanitized-result)
       (catch SQLException e
