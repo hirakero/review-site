@@ -8,13 +8,16 @@
             [duct.database.sql]
             [isomorphic-clojure-webapp.boundary.users :as users]))
 
-(def database-stub-normal
+(def ^:private alice-data {:id 1, :name "Alice", :email "alice@xample.com"})
+(def ^:private bob-data {:id 2, :name "Bob", :email "bob@example.com"})
+
+(def database-stub-normal 
   (shrubbery/stub users/Users
-                  {:get-users [{:id 1 :name "Alice"} {:id 2 :name "Bob"}]
-                   :create-user {:id 1}
-                   :get-user-by-id {:id 1 :name "Alice"}
-                   :update-user {:id 1}
-                   :delete-user {}}))
+                  {:get-users [alice-data bob-data]
+                   :create-user alice-data
+                   :get-user-by-id alice-data
+                   :update-user (assoc alice-data :name "Alice Ackerman")
+                   :delete-user alice-data}))
 
 (def database-stub-incorrect-data
   (shrubbery/stub users/Users
@@ -39,16 +42,16 @@
                                {:db database-stub-normal})
           {:keys [status body]} (handler request)]
       (is (= 200 status))
-      (is (= [{:id 1 :name "Alice"} {:id 2 :name "Bob"}] body))))
+      (is (= {:users [alice-data bob-data]} body))))
   (testing "create user"
     (testing "正常"
       (let [request (-> (mock/request :post "/users")
-                        (mock/json-body {:name "Alice"}))
+                        (mock/json-body (assoc alice-data :password "password")))
             handler (ig/init-key :isomorphic-clojure-webapp.handler.users/create
                                  {:db database-stub-normal})
             {:keys [status body]} (handler request)]
         (is (= 201 status))
-        (is (= 1 (:id body)))))
+        (is (= {:user alice-data} body))))
     (testing "データが不正"
       (let [request (-> (mock/request :post "/users")
                         (mock/json-body {})) 
@@ -61,11 +64,11 @@
   (testing "fetch user"
     (testing "正常"
       (let [request (mock/request :get "/users/1")
-            handler (ig/init-key :isomorphic-clojure-webapp.handler.users/fetch 
+            handler (ig/init-key :isomorphic-clojure-webapp.handler.users/fetch
                                  {:db database-stub-normal})
             {:keys [status body]} (handler request)]
         (is (= 200 status))
-        (is (= {:id 1 :name "Alice"} body))))
+        (is (= {:user alice-data} body))))
     
     (testing "データが見つからない"
       (let [request (mock/request :get "/users/10")
@@ -78,12 +81,12 @@
   (testing "update user"
     (testing "正常"
       (let [request (-> (mock/request :update "/users/1")
-                        (mock/json-body {:name "Bob"}))
+                        (mock/json-body {:name "Alice Ackerman"}))
             handler (ig/init-key :isomorphic-clojure-webapp.handler.users/update
                                  {:db database-stub-normal})
             {:keys [status body]} (handler request)]
         (is (= 200 status))
-        (is (= 1 (:id body)))))
+        (is (= {:user (assoc alice-data :name "Alice Ackerman")} body))))
     (testing "データが見つからない"
       (let [request (-> (mock/request :update "/users/10")
                         (mock/json-body {:name "Bob"}))

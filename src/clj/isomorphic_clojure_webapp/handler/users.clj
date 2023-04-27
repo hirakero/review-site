@@ -18,8 +18,7 @@
         {:status 404
          :body {:errors (:errors result)}}
         {:status 200
-         :body result}))))
-
+         :body {:users result}}))))
 
 (defmethod ig/init-key ::create [_ {:keys [db]}]
   (fn [req]
@@ -28,8 +27,7 @@
         {:status 400
          :body {:errors errors}}
         {:status 201
-         :body {:id id}}))))
-
+         :body {:user result}}))))
 
 (defmethod ig/init-key ::fetch [_ {:keys [db]}]
   (fn [req]
@@ -39,8 +37,7 @@
         {:status 404
          :body {:errors (:errors result)}}
         {:status 200
-         :body result}))))
-
+         :body {:user result}}))))
 
 (defmethod ig/init-key ::update [_ {:keys [db]}]
   (fn [req]
@@ -51,8 +48,7 @@
         {:status 404
          :body {:errors errors}}
         {:status 200
-         :body {:id id}}))))
-
+         :body {:user result }}))))
 
 (defmethod ig/init-key ::delete [_ {:keys [db]}]
   (fn [req]
