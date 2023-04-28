@@ -2,15 +2,6 @@
   (:require [integrant.core :as ig]
             [isomorphic-clojure-webapp.boundary.users :as users]))
 
-
-(defn- parse-l
-  [v]
-  ;; とりあえず。coerce?
-  (if (string? v)
-    (Long/parseLong v)
-    v))
-
-
 (defmethod ig/init-key ::all [_ {:keys [db]}]
   (fn [req]
     (let [result (users/get-users db)]
@@ -31,7 +22,7 @@
 
 (defmethod ig/init-key ::fetch [_ {:keys [db]}]
   (fn [req]
-    (let [id (-> (get-in req [:path-params :id]) (parse-l))
+    (let [id (get-in req [:path-params :id]) 
           result (users/get-user-by-id db id)]
       (if (:errors result)
         {:status 404
@@ -41,7 +32,7 @@
 
 (defmethod ig/init-key ::update [_ {:keys [db]}]
   (fn [req]
-    (let [id (-> (get-in req [:path-params :id]) parse-l)
+    (let [id (get-in req [:path-params :id]) 
           values (:body-params req)
           {:keys [id errors] :as result} (users/update-user db id values)]
       (if errors
@@ -52,7 +43,7 @@
 
 (defmethod ig/init-key ::delete [_ {:keys [db]}]
   (fn [req]
-    (let [id (-> (get-in req [:path-params :id]) parse-l)
+    (let [id (get-in req [:path-params :id])
           result (users/delete-user db id)]
       (if (:errors result)
         {:status 404

@@ -50,7 +50,7 @@
   (get-user-by-id [db id]
     (let [result (-> (hh/select :*)
                      (hh/from :users)
-                     (hh/where := :id id)
+                     (hh/where := :id [:uuid id])
                      (sql/format)
                      (execute-one! db))
           sanitized-result (dissoc result :password)]
@@ -75,7 +75,7 @@
   (update-user [db id values]
     (let [result (-> (hh/update :users)
                      (hh/set values)
-                     (hh/where [:= :id id])
+                     (hh/where [:= :id [:uuid id]])
                      (sql/format)
                      (execute-one! db))
           sanitized-result (dissoc result :password)]
@@ -83,7 +83,7 @@
 
   (delete-user [db id]
     (let [result (-> (hh/delete-from :users)
-                     (hh/where [:= :id id])
+                     (hh/where [:= :id [:uuid id]])
                      (sql/format)
                      (execute-one! db))
           sanitized-result (dissoc result :password)]
