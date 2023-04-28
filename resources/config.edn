@@ -17,11 +17,14 @@
                   :post #ig/ref :isomorphic-clojure-webapp.handler.users/create}]
              ["/:user-id"
               ["" {:get  #ig/ref :isomorphic-clojure-webapp.handler.users/fetch
-                   :put {:handler #ig/ref :isomorphic-clojure-webapp.handler.users/update}
+                   :put {:parameters {:body :isomorphic-clojure-webapp.spec.users/put-body}
+                         :handler #ig/ref :isomorphic-clojure-webapp.handler.users/update}
                    :delete #ig/ref :isomorphic-clojure-webapp.handler.users/delete}]
               ["/reviews" {:get #ig/ref :isomorphic-clojure-webapp.handler.reviews/all}]]]
-            ["/login" {:post {:handler #ig/ref :isomorphic-clojure-webapp.handler.users/login}}]
-            ["/signin" {:post {:handler #ig/ref :isomorphic-clojure-webapp.handler.users/signin}}]
+            ["/login" {:post {:parameters {:body :isomorphic-clojure-webapp.spec.users/login-body}
+                              :handler #ig/ref :isomorphic-clojure-webapp.handler.users/login}}]
+            ["/signin" {:post {:parameters {:body :isomorphic-clojure-webapp.spec.users/signin-body}
+                               :handler #ig/ref :isomorphic-clojure-webapp.handler.users/signin}}]
 
             ["/products"
              ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.products/all
