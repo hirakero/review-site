@@ -50,3 +50,9 @@
          :body {:errors (:errors result)}}
         {:status 204
          :body {}}))))
+
+(defmethod ig/init-key ::login [_ {:keys [db]}]
+  (fn [req]))
+
+(defmethod ig/init-key ::signin [_ {:keys [db]}]
+  (fn [req]))

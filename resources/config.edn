@@ -11,14 +11,34 @@
                                  :responses {:absolute-redirects true}}
 
   :duct.router/reitit
-  {:routes [["/" {:get #ig/ref :isomorphic-clojure-webapp.handler.app/index}]
-            ["/app/*" {:get #ig/ref :isomorphic-clojure-webapp.handler.app/index}]
+  {:routes [["/" {:get #ig/ref :isomorphic-clojure-webapp.handler.app/index}] 
             ["/users"
              ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.users/all
                   :post #ig/ref :isomorphic-clojure-webapp.handler.users/create}]
-             ["/:id" {:get #ig/ref :isomorphic-clojure-webapp.handler.users/fetch
-                      :update #ig/ref :isomorphic-clojure-webapp.handler.users/update
-                      :delete #ig/ref :isomorphic-clojure-webapp.handler.users/delete}]]]}
+             ["/:user-id"
+              ["" {:get  #ig/ref :isomorphic-clojure-webapp.handler.users/fetch
+                   :put {:handler #ig/ref :isomorphic-clojure-webapp.handler.users/update}
+                   :delete #ig/ref :isomorphic-clojure-webapp.handler.users/delete}]
+              ["/reviews" {:get #ig/ref :isomorphic-clojure-webapp.handler.reviews/all}]]]
+            ["/login" {:post {:handler #ig/ref :isomorphic-clojure-webapp.handler.users/login}}]
+            ["/signin" {:post {:handler #ig/ref :isomorphic-clojure-webapp.handler.users/signin}}]
+
+            ["/products"
+             ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.products/all
+                  :post #ig/ref :isomorphic-clojure-webapp.handler.products/create}]
+             ["/:product-id"
+              ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.products/fetch
+                   :put #ig/ref :isomorphic-clojure-webapp.handler.products/update
+                   :delete #ig/ref :isomorphic-clojure-webapp.handler.products/delete}]
+              ["/reviews" {:get #ig/ref :isomorphic-clojure-webapp.handler.reviews/all}]]]
+            
+            ["/review"
+             ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.reviews/all
+                  :post #ig/ref :isomorphic-clojure-webapp.handler.reviews/create}]
+             ["/:review-id"
+              ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.reviews/fetch
+                   :put #ig/ref :isomorphic-clojure-webapp.handler.reviews/update
+                   :delete #ig/ref :isomorphic-clojure-webapp.handler.reviews/delete}]]]]}
 
   :isomorphic-clojure-webapp.handler.app/index {}
   :isomorphic-clojure-webapp.handler.users/all {:db #ig/ref :duct.database.sql/hikaricp}
@@ -26,18 +46,29 @@
   :isomorphic-clojure-webapp.handler.users/fetch {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.handler.users/update {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.handler.users/delete {:db #ig/ref :duct.database.sql/hikaricp}
-  
+  :isomorphic-clojure-webapp.handler.users/login {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.handler.users/signin {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.handler.products/all {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.handler.products/create {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.handler.products/fetch {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.handler.products/update {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.handler.products/delete {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.handler.reviews/all {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.handler.reviews/create {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.handler.reviews/fetch {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.handler.reviews/update {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.handler.reviews/delete {:db #ig/ref :duct.database.sql/hikaricp}
+
   :duct.migrator/ragtime {:migrations [#ig/ref :review-site.migration/create-users-table]}
 
-[:duct.migrator.ragtime/sql :review-site.migration/create-users-table]
-{:up ["CREATE TABLE users (id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
+  [:duct.migrator.ragtime/sql :review-site.migration/create-users-table]
+  {:up ["CREATE TABLE users (id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
                            name TEXT NOT NULL,
                            email TEXT,
                            password TEXT,
                            created TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
                            updated TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP);"]
- :down ["DROP TABLE users;"]}
-}
+   :down ["DROP TABLE users;"]}}
 
  :duct.profile/dev   #duct/include "dev"
  :duct.profile/local #duct/include "local"
