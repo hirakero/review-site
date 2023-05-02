@@ -9,7 +9,6 @@
 
 (defprotocol Products
 
-   
   (get-products [db query])
 
   (get-product-by [db k v])
@@ -21,17 +20,20 @@
   (delete-product [db id]))
 
 
-(defn- execute-one! [sql db]
+(defn- exec [f sql db]
   (let [ds  (-> db :spec :datasource)]
-    (jdbc/execute-one! ds sql 
-                       {:return-keys true
-                        :builder-fn rs/as-unqualified-maps})))
+    (try
+      (f ds sql
+         {:return-keys true
+          :builder-fn rs/as-unqualified-maps})
+      (catch SQLException e
+        (throw (ex-info "database error" {:query sql} e))))))
 
-(defn- execute! [sql db]
-  (let [ds  (-> db :spec :datasource)]
-    (jdbc/execute! ds sql
-                       {:return-keys true
-                        :builder-fn rs/as-unqualified-maps})))
+(defn execute-one! [sql db]
+  (exec jdbc/execute-one! sql db))
+
+(defn execute! [sql db]
+  (exec jdbc/execute! sql db))
 
 (extend-protocol Products
   duct.database.sql.Boundary
@@ -45,25 +47,19 @@
 
   (get-product-by [db k v]
     (let [value (if (= :id k) [:uuid v] v)
-          result (-> (hh/select :*)
-                     (hh/from :products)
-                     (hh/where := k value)
+          query (-> (hh/select :*)
+                    (hh/from :products)
+                    (hh/where := k value)
+                    (sql/format))]
+      (execute-one! query db)))
+
+  (create-product [db {:keys [name description]}]
+    (let [result (-> (hh/insert-into :products [:name :description :created :updated])
+                     (hh/values [[name description [:now] [:now]]])
                      (sql/format)
                      (execute-one! db))]
       result))
 
-  (create-product [db {:keys [name description]}]
-    (try
-      (let [result (-> (hh/insert-into :products [:name :description :created :updated])
-                       (hh/values [[name description [:now] [:now]]])
-                       (sql/format)
-                       (execute-one! db))]
-        result)
-      (catch SQLException e
-        (throw e)
-        ;; TODO 
-        )))
-  
   (update-product [db id values]
     (let [result (-> (hh/update :products)
                      (hh/set values)

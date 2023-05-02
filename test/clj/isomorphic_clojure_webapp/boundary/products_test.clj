@@ -14,34 +14,51 @@
       (jdbc/execute! ds ["delete from products"]))
     (f)))
 
-
 (deftest products-boundary-test
   (let [boundary (:duct.database.sql/hikaricp system)]
-   (testing "create"
-     (let [result (sut/create-product boundary {:name "Torque"
-                                                :description "Asymmetric design"})
-           id (:id result)]
-       (is (= java.util.UUID (type id)))
-       (is (= "Torque" (:name result)))
-       (is (= "Asymmetric design" (:description result)))  
+    (testing "create"
+      (let [result (sut/create-product boundary {:name "Torque"
+                                                 :description "Asymmetric design"})
+            id (:id result)]
+        (is (= java.util.UUID (type id)))
+        (is (= "Torque" (:name result)))
+        (is (= "Asymmetric design" (:description result)))
 
-       (testing "fetch"
-         (let [result  (sut/get-product-by boundary :id id)]
-           (is (= "Torque" (:name result)))))
+        (testing "fetch"
+          (testing "正常"
+            (let [result  (sut/get-product-by boundary :id id)]
+              (is (= "Torque" (:name result)))))
+          (testing "対象データが無いときはnil"
+            (let [result  (sut/get-product-by boundary :name "abc")]
+              (is (= nil  result))))
+          (testing "例外が発生したらExceptionInfoで返す"
+            (is (thrown-with-msg? clojure.lang.ExceptionInfo #"err"
+                                  (sut/get-product-by boundary :id "abc")))
+            (let [e (try (sut/get-product-by boundary :id "abc")
+                         (catch clojure.lang.ExceptionInfo e
+                           e))]
+              (is (not (empty?  (ex-data e)))))))
 
-       (testing "update"
-         (let [result (sut/update-product boundary id {:name "Sparrow"})]
-           (is (= "Sparrow"  (:name result)))
-           result))
-       
-       (testing "all"
-         (sut/create-product boundary {:name "Slant Roller" 
-                                       :description "small"})
-         (let [result (sut/get-products boundary {})]
-           (println "all " result)
-           (is (= 2 (count result)))))
-       
-       (testing "delete"
-         (let [result (sut/delete-product boundary id)]
-           (is (= id (:id result))))))) 
-    ) )
+        (testing "update"
+          (testing "正常"
+            (let [result (sut/update-product boundary id {:name "Sparrow"})]
+              (is (= "Sparrow"  (:name result)))
+              result))
+          (testing "対象データが無いときはnil"
+            (let [result (sut/update-product boundary "00000000-0000-0000-0000-000000000000" {:name "Sparrow"})]
+              (is (= nil result))
+              result)))
+
+        (testing "all"
+          (sut/create-product boundary {:name "Slant Roller"
+                                        :description "small"})
+          (let [result (sut/get-products boundary {})]
+            (is (= 2 (count result)))))
+
+        (testing "delete"
+          (testing "正常"
+            (let [result (sut/delete-product boundary id)]
+              (is (= id (:id result)))))
+          (testing "対象データが無いときはnil"
+            (let [result (sut/delete-product boundary "00000000-0000-0000-0000-000000000000")]
+              (is (= nil result)))))))))
