@@ -8,25 +8,27 @@
             [next.jdbc :as jdbc]))
 
 (use-fixtures :each
-  (fn [f] 
+  (fn [f]
     (let [boundary (:duct.database.sql/hikaricp system)
           ds (-> boundary :spec :datasource)]
       (jdbc/execute! ds ["delete from users"]))
     (f)))
 
-(comment 
+(comment
   (#(let [boundary (:duct.database.sql/hikaricp system)
           ds (-> boundary :spec :datasource)]
 
       (let [result (jdbc/execute! ds [%])]
         result))
-   "select * from users"
+   #_"select * from users"
+   #_"select * from products"
+   #_"select uuid('00000000-0000-0000-0000-000000000000')"
+   "select * from products where id = '04875e11-0591-4a1b-ab4f-287c3367cf29'"
    #_"insert into users (name) values ('Bob')"
-   #_"delete from users")
-  )
+   #_"delete from users"))
 
-(deftest users-boundary-test 
-  (let [boundary (:duct.database.sql/hikaricp system)] 
+(deftest users-boundary-test
+  (let [boundary (:duct.database.sql/hikaricp system)]
     (testing "all"
       (let [result (users/get-users boundary)]
         (is (= [] result))))
@@ -44,7 +46,7 @@
         (is (not (nil? (:updated result))))
 
         (testing "fetch"
-          (let [result  (users/get-user-by-id boundary id)]
+          (let [result  (users/get-user-by boundary :id id)]
             (is (= id (:id result)))
             (is (= "Alice" (:name result)))
             (is (= "alice@example.com" (:email result)))
@@ -75,8 +77,6 @@
             (is (= id (:id result)))
             (is (nil? (:password result)))))))
     #_(testing "create 異常"
-      (let [result (users/create-user boundary {:namae "Aida"})]
-        #_(is ( (-> result)))
-        #_(is (= "Alice" (-> result first :name)))
-        )
-      )))
+        (let [result (users/create-user boundary {:namae "Aida"})]
+          #_(is ((-> result)))
+          #_(is (= "Alice" (-> result first :name)))))))

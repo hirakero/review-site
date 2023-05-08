@@ -6,14 +6,14 @@
             [next.jdbc :as jdbc]
             [next.jdbc.result-set :as rs])
   (:import (java.sql
-             SQLException)))
+            SQLException)))
 
 
 (defprotocol Users
 
   (get-users [db])
 
-  (get-user-by-id [db id])
+  (get-user-by [db k v])
 
   (create-user [db values])
 
@@ -47,10 +47,11 @@
           sanitized-result (map #(dissoc % :password) result)]
       sanitized-result))
 
-  (get-user-by-id [db id]
-    (let [result (-> (hh/select :*)
+  (get-user-by [db k v]
+    (let [value (if (= :id k) [:uuid v] v)
+          result (-> (hh/select :*)
                      (hh/from :users)
-                     (hh/where := :id [:uuid id])
+                     (hh/where := k value)
                      (sql/format)
                      (execute-one! db))
           sanitized-result (dissoc result :password)]
@@ -63,7 +64,7 @@
                        (hh/values [[name email hashed-password [:now] [:now]]])
                        (sql/format)
                        #_(#((println "query " %) %))
-                       (execute-one! db)) 
+                       (execute-one! db))
             sanitized-result (dissoc result :password)]
         sanitized-result)
       (catch SQLException e
