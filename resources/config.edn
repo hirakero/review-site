@@ -12,38 +12,58 @@
 
   :duct.router/reitit
   {:routes [["/" {:get #ig/ref :isomorphic-clojure-webapp.handler.app/index}]
-            ["/users"
-             ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.users/all
-                  :post #ig/ref :isomorphic-clojure-webapp.handler.users/create}]
-             ["/:user-id"
-              ["" {:get  #ig/ref :isomorphic-clojure-webapp.handler.users/fetch
-                   :put {:parameters {:body :isomorphic-clojure-webapp.spec.users/put-body}
-                         :handler #ig/ref :isomorphic-clojure-webapp.handler.users/update}
-                   :delete #ig/ref :isomorphic-clojure-webapp.handler.users/delete}]
-              ["/reviews" {:get #ig/ref :isomorphic-clojure-webapp.handler.reviews/all}]]]
-            ["/login" {:post {:parameters {:body :isomorphic-clojure-webapp.spec.users/login-body}
-                              :handler #ig/ref :isomorphic-clojure-webapp.handler.users/login}}]
-            ["/signin" {:post {:parameters {:body :isomorphic-clojure-webapp.spec.users/signin-body}
-                               :handler #ig/ref :isomorphic-clojure-webapp.handler.users/signin}}]
+            ["/ui"
+             ["/products"
+              ["" #ig/ref :isomorphic-clojure-webapp.ui.handler.products/list]
+              ["/create" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.products/create
+                          :post #ig/ref :isomorphic-clojure-webapp.ui.handler.products/create-post}]
+              ["/detail/:product-id" #ig/ref :isomorphic-clojure-webapp.ui.handler.products/detail]
+              ["/edit/:product-id" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.products/edit
+                                    :post #ig/ref :isomorphic-clojure-webapp.ui.handler.products/edit-post}]
+              ["/delete/:product-id" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.products/delete
+                                      :post #ig/ref :isomorphic-clojure-webapp.ui.handler.products/delete-post}]]]
+            ["/api"
+             ["/users"
+              ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.users/all
+                   :post #ig/ref :isomorphic-clojure-webapp.handler.users/create}]
+              ["/:user-id"
+               ["" {:get  #ig/ref :isomorphic-clojure-webapp.handler.users/fetch
+                    :put {:parameters {:body :isomorphic-clojure-webapp.spec.users/put-body}
+                          :handler #ig/ref :isomorphic-clojure-webapp.handler.users/update}
+                    :delete #ig/ref :isomorphic-clojure-webapp.handler.users/delete}]
+               ["/reviews" {:get #ig/ref :isomorphic-clojure-webapp.handler.reviews/all}]]]
+             ["/login" {:post {:parameters {:body :isomorphic-clojure-webapp.spec.users/login-body}
+                               :handler #ig/ref :isomorphic-clojure-webapp.handler.users/login}}]
+             ["/signin" {:post {:parameters {:body :isomorphic-clojure-webapp.spec.users/signin-body}
+                                :handler #ig/ref :isomorphic-clojure-webapp.handler.users/signin}}]
 
-            ["/products"
-             ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.products/all
-                  :post #ig/ref :isomorphic-clojure-webapp.handler.products/create}]
-             ["/:product-id"
-              ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.products/fetch
-                   :put #ig/ref :isomorphic-clojure-webapp.handler.products/update
-                   :delete #ig/ref :isomorphic-clojure-webapp.handler.products/delete}]
-              ["/reviews" {:get #ig/ref :isomorphic-clojure-webapp.handler.reviews/all}]]]
+             ["/products"
+              ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.products/all
+                   :post #ig/ref :isomorphic-clojure-webapp.handler.products/create}]
+              ["/:product-id"
+               ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.products/fetch
+                    :put #ig/ref :isomorphic-clojure-webapp.handler.products/update
+                    :delete #ig/ref :isomorphic-clojure-webapp.handler.products/delete}]
+               ["/reviews" {:get #ig/ref :isomorphic-clojure-webapp.handler.reviews/all}]]]
 
-            ["/reviews"
-             ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.reviews/all
-                  :post #ig/ref :isomorphic-clojure-webapp.handler.reviews/create}]
-             ["/:review-id"
-              ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.reviews/fetch
-                   :put #ig/ref :isomorphic-clojure-webapp.handler.reviews/update
-                   :delete #ig/ref :isomorphic-clojure-webapp.handler.reviews/delete}]]]]}
+             ["/reviews"
+              ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.reviews/all
+                   :post #ig/ref :isomorphic-clojure-webapp.handler.reviews/create}]
+              ["/:review-id"
+               ["" {:get #ig/ref :isomorphic-clojure-webapp.handler.reviews/fetch
+                    :put #ig/ref :isomorphic-clojure-webapp.handler.reviews/update
+                    :delete #ig/ref :isomorphic-clojure-webapp.handler.reviews/delete}]]]]]}
 
   :isomorphic-clojure-webapp.handler.app/index {}
+  :isomorphic-clojure-webapp.ui.handler.products/list {}
+  :isomorphic-clojure-webapp.ui.handler.products/detail {}
+  :isomorphic-clojure-webapp.ui.handler.products/create {}
+  :isomorphic-clojure-webapp.ui.handler.products/create-post {}
+  :isomorphic-clojure-webapp.ui.handler.products/edit {}
+  :isomorphic-clojure-webapp.ui.handler.products/edit-post {}
+  :isomorphic-clojure-webapp.ui.handler.products/delete {}
+  :isomorphic-clojure-webapp.ui.handler.products/delete-post {}
+
   :isomorphic-clojure-webapp.handler.users/all {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.handler.users/create {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.handler.users/fetch {:db #ig/ref :duct.database.sql/hikaricp}
@@ -57,7 +77,7 @@
   :isomorphic-clojure-webapp.handler.products/fetch {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.handler.products/update {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.handler.products/delete {:db #ig/ref :duct.database.sql/hikaricp}
-  
+
   :isomorphic-clojure-webapp.handler.reviews/all {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.handler.reviews/create {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.handler.reviews/fetch {:db #ig/ref :duct.database.sql/hikaricp}
@@ -75,7 +95,7 @@
                            created TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
                            updated TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP);"]
    :down ["DROP TABLE users;"]}
-  
+
   [:duct.migrator.ragtime/sql :review-site.migration/create-products-table]
   {:up ["CREATE TABLE products (id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
                            name TEXT NOT NULL,
