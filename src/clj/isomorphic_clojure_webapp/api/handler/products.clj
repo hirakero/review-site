@@ -1,6 +1,6 @@
-(ns isomorphic-clojure-webapp.handler.products
+(ns isomorphic-clojure-webapp.api.handler.products
   (:require [integrant.core :as ig]
-            [isomorphic-clojure-webapp.boundary.products :as products]))
+            [isomorphic-clojure-webapp.api.boundary.products :as products]))
 
 (defmethod ig/init-key ::all [_ {:keys [db]}]
   (fn [req]

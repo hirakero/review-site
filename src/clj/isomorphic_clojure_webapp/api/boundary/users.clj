@@ -1,4 +1,4 @@
-(ns isomorphic-clojure-webapp.boundary.users
+(ns isomorphic-clojure-webapp.api.boundary.users
   (:require [buddy.hashers :as hashers]
             [duct.database.sql]
             [honey.sql :as sql]

@@ -1,4 +1,4 @@
-(ns isomorphic-clojure-webapp.boundary.products
+(ns isomorphic-clojure-webapp.api.boundary.products
   (:require [duct.database.sql]
             [honey.sql :as sql]
             [honey.sql.helpers :as hh]

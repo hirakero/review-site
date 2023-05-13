@@ -1,6 +1,6 @@
-(ns isomorphic-clojure-webapp.boundary.users-test
+(ns isomorphic-clojure-webapp.api.boundary.users-test
   (:require [clojure.test :refer [deftest testing is use-fixtures]]
-            [isomorphic-clojure-webapp.boundary.users :as users]
+            [isomorphic-clojure-webapp.api.boundary.users :as users]
             [integrant.repl.state :refer [config system]]
             [duct.database.sql]
             [matcher-combinators.test]

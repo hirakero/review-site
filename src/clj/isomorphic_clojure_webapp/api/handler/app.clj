@@ -1,4 +1,4 @@
-(ns isomorphic-clojure-webapp.handler.app
+(ns isomorphic-clojure-webapp.api.handler.app
   (:require [integrant.core :as ig]
             [rum.core :refer [render-html]]))
 
