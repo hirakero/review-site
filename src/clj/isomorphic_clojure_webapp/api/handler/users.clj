@@ -1,6 +1,6 @@
-(ns isomorphic-clojure-webapp.handler.users
+(ns isomorphic-clojure-webapp.api.handler.users
   (:require [integrant.core :as ig]
-            [isomorphic-clojure-webapp.boundary.users :as users]))
+            [isomorphic-clojure-webapp.api.boundary.users :as users]))
 
 (defmethod ig/init-key ::all [_ {:keys [db]}]
   (fn [req]
