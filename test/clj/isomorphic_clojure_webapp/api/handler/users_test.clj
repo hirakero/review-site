@@ -171,3 +171,14 @@
       (testing "対象データが無ければ not found"
         (let [{:keys [status body]} (helper/http-delete "/api/users/00000000-0000-0000-0000-000000000000")]
           (is (= 404 status)))))))
+
+(deftest handler-login-test
+  (let [{:keys [status body]} (helper/http-post "/api/signin" {:name "alice"
+                                                               :email "alice@example.com"
+                                                               :password "password"})]
+    (testing "正常にサインインできたら を返す"
+      (is (= 201 status))))
+  (testing "すでに登録済みの場合はエラーメッセージをを返す"
+    #_(is (= 400)))
+  (testing "内容が不正な場合はエラーメッセージをを返す"
+    #_(is (= 400))))
