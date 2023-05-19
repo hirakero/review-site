@@ -8,6 +8,7 @@
    :headers {"content-type" "text/html"}
    :body (rum/render-html [:html
                            [:body body]])})
+
 (defn see-other [location]
   {:status 303
    :headers {"content-type" "text/html"
@@ -24,7 +25,7 @@
           [:a {:href "/ui/products/create"} "create"]))))
 
 (defmethod ig/init-key ::detail [_ _]
-  (fn [{{:keys [:product-id]} :path-params}]
+  (fn [{{:keys [product-id]} :path-params}]
     (let [{:keys [name description]} (-> (helper/http-get (str "/api/products/" product-id))
                                          :body
                                          :product)]
@@ -52,13 +53,12 @@
 (defmethod ig/init-key ::create-post [_ _]
   (fn [{:keys [form-params]}]
     (let [{:strs [name description]} form-params]
-      (if-let [result (-> (helper/http-post "/api/products" {:name name
-                                                             :description description})
-                          :body
-                          :product)]
-        (see-other (str "/ui/products"))
-        (ok [:h2  "product create"]
-            [:div "error"])))))
+      (let [{:keys [status]}  (helper/http-post "/api/products" {:name name
+                                                                 :description description})]
+        (if (= status 201)
+          (see-other (str "/ui/products"))
+          (ok [:h2  "product create"]
+              [:div "error"]))))))
 
 (defmethod ig/init-key ::edit [_ _]
   (fn [{:keys [path-params]}]
@@ -81,13 +81,12 @@
 (defmethod ig/init-key ::edit-post [_ _]
   (fn [{:keys [form-params path-params]}]
     (let [{:strs [name description]} form-params]
-      (if-let [result (-> (helper/http-put (str "/api/products/" (:product-id path-params)) {:name name
-                                                                                             :description description})
-                          :body
-                          :product)]
-        (see-other (str "/ui/products"))
-        (ok [:h2  "product edit"]
-            [:div "error"])))))
+      (let [{:keys [status body]}  (helper/http-put (str "/api/products/" (:product-id path-params)) {:name name
+                                                                                                      :description description})]
+        (if (= status 200)
+          (see-other (str "/ui/products"))
+          (ok [:h2  "product edit"]
+              [:div "error"]))))))
 
 (defmethod ig/init-key ::delete [_ _]
   (fn [{:keys [path-params]}]
@@ -106,9 +105,8 @@
 
 (defmethod ig/init-key ::delete-post [_ _]
   (fn [{:keys [path-params]}]
-    (let [{:keys [status body]} (-> (helper/http-delete (str "/api/products/" (:product-id path-params))))]
+    (let [{:keys [status]} (-> (helper/http-delete (str "/api/products/" (:product-id path-params))))]
       (if (= 204 status)
         (see-other (str "/ui/products"))
         (ok [:h2 "product delete post"]
             [:div "error"])))))
-
