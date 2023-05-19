@@ -120,40 +120,42 @@
     (f)))
 
 (deftest handler-users-test
-  (testing "get /users データがない場合は空のベクタを返す"
+  (testing "get /users データがない場合は何も返さない"
     (let [{:keys [status body]} (helper/http-get "/api/users")]
       (is (=  404 status))
-      (is (=  [] (:users body)))))
+      (is (nil? (:users body)))))
 
-  (let [{:keys [status body]} (helper/http-post "/api/users"
-                                                {:name "Alice"
-                                                 :email "alice@example.com"
-                                                 :password "password"})
-        user (:user body)
-        id (:id user)]
-    (testing "post /users 登録した内容を返す"
+  (let [{:keys [status headers body]} (helper/http-post "/api/users"
+                                                        {:name "Alice"
+                                                         :email "alice@example.com"
+                                                         :password "password"})
+        id (:id body)]
+    (testing "post /users 登録した内容を直接返す"
       (is (= status 201))
-      (is (= "Alice" (:name user)))
-      (is (= "alice@example.com" (:email user))))
+      (is (get headers "location"))
+      (is (= "Alice" (:name body)))
+      (is (= "alice@example.com" (:email body))))
 
     (testing "get /users/:user-id "
       (testing "取得した内容を返す"
-        (let [{:keys [status body] :as all} (helper/http-get (str "/api/users/" id))]
+        (let [{:keys [status body]} (helper/http-get (str "/api/users/" id))]
           (is (= 200 status))
           (is (= "Alice" (-> body :user :name)))))
 
-      (testing "対象データが無ければ not found"
+      (testing "対象データが無ければ not foundで何も返さない"
         (let [{:keys [status body] :as all} (helper/http-get (str "/api/users/00000000-0000-0000-0000-000000000000"))]
-          (is (= 404 status)))))
+          (is (= 404 status))
+          (is (nil? body)))))
 
     (testing "put /users/:user-id"
-      (testing "更新した内容を返す"
+      (testing "更新した内容を直接返す"
         (let [{:keys [status body]} (helper/http-put (str "/api/users/" id) {:name "Alice Ackerman"})]
           (is (= 200 status))
-          (is (= "Alice Ackerman" (-> body :user :name)))))
-      (testing "対象データが無ければ not found"
+          (is (= "Alice Ackerman" (-> body :name)))))
+      (testing "対象データが無ければ not foundで何も返さない"
         (let [{:keys [status body]} (helper/http-put "/api/users/00000000-0000-0000-0000-000000000000" {:name "Alice Ackerman"})]
-          (is (= 404 status)))))
+          (is (= 404 status))
+          (is (nil? body)))))
 
     (testing "get /users データの配列を返す"
       (helper/http-post "/api/users"
@@ -162,12 +164,26 @@
                          :password "password"})
       (let [{:keys [status body]} (helper/http-get "/api/users")]
         (is (= 200 status))
+        (is (vector? (-> body :users)))
         (is (= 2 (-> body :users count)))))
 
     (testing "delete"
-      (testing "削除に成功したらno content"
+      (testing "削除に成功したらno content で何も返さない"
         (let [{:keys [status body]} (helper/http-delete (str "/api/users/" id))]
-          (is (= 204 status))))
-      (testing "対象データが無ければ not found"
+          (is (= 204 status))
+          (is (nil? body))))
+      (testing "対象データが無ければ not found で何も返さない"
         (let [{:keys [status body]} (helper/http-delete "/api/users/00000000-0000-0000-0000-000000000000")]
-          (is (= 404 status)))))))
+          (is (= 404 status))
+          (is (nil? body)))))))
+
+(deftest handler-login-test
+  (let [{:keys [status body]} (helper/http-post "/api/signin" {:name "alice"
+                                                               :email "alice@example.com"
+                                                               :password "password"})]
+    (testing "正常にサインインできたら を返す"
+      (is (= 201 status))))
+  (testing "すでに登録済みの場合はエラーメッセージをを返す"
+    #_(is (= 400)))
+  (testing "内容が不正な場合はエラーメッセージをを返す"
+    #_(is (= 400))))
