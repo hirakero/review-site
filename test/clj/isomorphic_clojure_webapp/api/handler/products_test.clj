@@ -24,39 +24,41 @@
     (f)))
 
 (deftest handler-products-test
-  (testing "get /products データがない場合は空のベクタを返す"
+  (testing "get /products データがない場合は何も返さない"
     (let [{:keys [status body] :as all} (helper/http-get "/api/products")]
       (is (=  404 status))
-      (is (=  [] (:products body)))))
+      (is (nil? body))))
   (let [{:keys [status headers body]} (helper/http-post "/api/products"
                                                         {:name "Hammer XT"
                                                          :description "for hammer grip"})
-        product (:product body)
-        id (:id product)]
-    (testing "post /products 登録した内容を返す"
+        id (:id body)]
+    (testing "post /products 登録した内容を直接返す"
       (is (= status 201))
       (is (get headers "location"))
-      (is (= "Hammer XT" (:name product)))
-      (is (= "for hammer grip" (:description product))))
+      (is (= "Hammer XT" (:name body)))
+      (is (= "for hammer grip" (:description body))))
 
     (testing "get /products/:product-id "
       (testing "取得した内容を返す"
-        (let [{:keys [status body] :as all} (helper/http-get (str "/api/products/" id))]
+        (let [{:keys [status body]} (helper/http-get (str "/api/products/" id))]
           (is (= 200 status))
           (is (= "Hammer XT" (-> body :product :name)))))
 
-      (testing "対象データが無ければ not found"
-        (let [{:keys [status body] :as all} (helper/http-get (str "/api/products/00000000-0000-0000-0000-000000000000"))]
-          (is (= 404 status)))))
+      (testing "対象データが無ければ not found で何も返さない"
+        (let [{:keys [status body]} (helper/http-get (str "/api/products/00000000-0000-0000-0000-000000000000"))]
+          (println "\nbody " body)
+          (is (= 404 status))
+          (is (nil? body)))))
 
     (testing "put /products/:product-id"
-      (testing "更新した内容を返す"
+      (testing "更新した内容を直接返す"
         (let [{:keys [status body]} (helper/http-put (str "/api/products/" id) {:name "Hammer LT"})]
           (is (= 200 status))
-          (is (= "Hammer LT" (-> body :product :name)))))
-      (testing "対象データが無ければ not found"
+          (is (= "Hammer LT" (-> body :name)))))
+      (testing "対象データが無ければ not found で何も返さない"
         (let [{:keys [status body]} (helper/http-put "/api/products/00000000-0000-0000-0000-000000000000" {:name "Hammer LT"})]
-          (is (= 404 status)))))
+          (is (= 404 status))
+          (is (nil? body)))))
 
     (testing "get /products データの配列を返す"
       (helper/http-post "/api/products"
@@ -64,12 +66,15 @@
                          :description "ocuralis plug"})
       (let [{:keys [status body]} (helper/http-get "/api/products")]
         (is (= 200 status))
+        (is (vector? (-> body :products)))
         (is (= 2 (-> body :products count)))))
 
     (testing "delete"
-      (testing "削除に成功したらno content"
+      (testing "削除に成功したらno contentで何も返さない"
         (let [{:keys [status body]} (helper/http-delete (str "/api/products/" id))]
-          (is (= 204 status))))
-      (testing "対象データが無ければ not found"
+          (is (= 204 status))
+          (is (nil? body))))
+      (testing "対象データが無ければ not foundで何も返さない"
         (let [{:keys [status body]} (helper/http-delete "/api/products/00000000-0000-0000-0000-000000000000")]
-          (is (= 404 status)))))))
+          (is (= 404 status))
+          (is (nil? body)))))))

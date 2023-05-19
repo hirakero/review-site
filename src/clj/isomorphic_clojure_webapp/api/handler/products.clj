@@ -7,14 +7,14 @@
   (fn [req]
     (let [result (products/get-products db {})]
       (if (empty? result)
-        (rres/not-found {:products []})
+        (rres/not-found nil)
         (rres/response {:products result})))))
 
 (defmethod ig/init-key ::fetch [_ {:keys [db]}]
   (fn [{:keys [path-params]}]
     (let [result (products/get-product-by db :id (:product-id path-params))]
       (if (empty? result)
-        (rres/not-found {:product nil})
+        (rres/not-found nil)
         (rres/response {:product result})))))
 
 (defmethod ig/init-key ::create [_ {:keys [db]}]
@@ -22,19 +22,18 @@
     (let [result (products/create-product db body-params)]
       (if (empty? result)
         (rres/bad-request {:product nil})
-        (rres/created (str "/api/products/" (:id result)) {:product result})))))
+        (rres/created (str "/api/products/" (:id result))  result)))))
 
 (defmethod ig/init-key ::update [_ {:keys [db]}]
   (fn [{:keys [path-params body-params]}]
     (let [result (products/update-product db (:product-id path-params) body-params)]
       (if (empty? result)
-        (rres/not-found {:product nil})
-        (rres/response {:product result})))))
+        (rres/not-found nil)
+        (rres/response  result)))))
 
 (defmethod ig/init-key ::delete [_ {:keys [db]}]
   (fn [{:keys [path-params]}]
     (let [result (products/delete-product db (:product-id path-params))]
       (if (empty? result)
-        (rres/not-found {})
-        {:status 204
-         :body {}}))))
+        (rres/not-found nil)
+        {:status 204}))))
