@@ -6,7 +6,7 @@
             [shrubbery.core :as shrubbery]
             [mockfn.macros :as mfn]
             [duct.database.sql]
-            [isomorphic-clojure-webapp.test-helper :as helper]
+            [isomorphic-clojure-webapp.ui.boundary.http-helper :as helper]
             [isomorphic-clojure-webapp.api.boundary.users :as users]
             [next.jdbc :as jdbc]))
 

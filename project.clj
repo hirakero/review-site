@@ -13,7 +13,8 @@
                  [org.postgresql/postgresql "42.5.3"]
                  [rum "0.12.9"]
                  [com.github.seancorfield/honeysql "2.4.1011"]
-                 [buddy "2.0.0"]]
+                 [buddy "2.0.0"]
+                 [clj-http "3.12.3"]]
   :plugins [[duct/lein-duct "0.12.3"]
             [lein-cloverage "1.2.2"]
             [lein-kibit "0.1.8"]
@@ -44,7 +45,6 @@
                                    [ring/ring-mock "0.4.0"]
                                    [com.gearswithingears/shrubbery "0.4.1"]
                                    [nubank/mockfn "0.7.0"]
-                                   [clj-http "3.12.3"] 
                                    [nubank/matcher-combinators "3.8.5"]]
                   :aliases {"idiom:check" ["do"
                                            ["eastwood"]
