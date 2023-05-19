@@ -125,14 +125,15 @@
       (is (=  404 status))
       (is (=  [] (:users body)))))
 
-  (let [{:keys [status body]} (helper/http-post "/api/users"
-                                                {:name "Alice"
-                                                 :email "alice@example.com"
-                                                 :password "password"})
+  (let [{:keys [status headers body]} (helper/http-post "/api/users"
+                                                        {:name "Alice"
+                                                         :email "alice@example.com"
+                                                         :password "password"})
         user (:user body)
         id (:id user)]
     (testing "post /users 登録した内容を返す"
       (is (= status 201))
+      (is (get headers "location"))
       (is (= "Alice" (:name user)))
       (is (= "alice@example.com" (:email user))))
 

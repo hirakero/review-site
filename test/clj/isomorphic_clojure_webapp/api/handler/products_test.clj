@@ -28,13 +28,14 @@
     (let [{:keys [status body] :as all} (helper/http-get "/api/products")]
       (is (=  404 status))
       (is (=  [] (:products body)))))
-  (let [{:keys [status body]} (helper/http-post "/api/products"
-                                                {:name "Hammer XT"
-                                                 :description "for hammer grip"})
+  (let [{:keys [status headers body]} (helper/http-post "/api/products"
+                                                        {:name "Hammer XT"
+                                                         :description "for hammer grip"})
         product (:product body)
         id (:id product)]
     (testing "post /products 登録した内容を返す"
       (is (= status 201))
+      (is (get headers "location"))
       (is (= "Hammer XT" (:name product)))
       (is (= "for hammer grip" (:description product))))
 
