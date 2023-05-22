@@ -41,8 +41,8 @@
 
         (testing "update"
           (testing "正常"
-            (let [result (sut/update-product boundary id {:name "Sparrow"})]
-              (is (= "Sparrow"  (:name result)))
+            (let [result (sut/update-product boundary id {:name "Torque X"})]
+              (is (= "Torque X"  (:name result)))
               result))
           (testing "対象データが無いときはnil"
             (let [result (sut/update-product boundary "00000000-0000-0000-0000-000000000000" {:name "Sparrow"})]
@@ -52,8 +52,20 @@
         (testing "all"
           (sut/create-product boundary {:name "Slant Roller"
                                         :description "small"})
+          (sut/create-product boundary {:name "Flippin' Pickle"
+                                        :description "pfs"})
+          (sut/create-product boundary {:name "Stylus Revolve"
+                                        :description "thin profile"})
+          (sut/create-product boundary {:name "Beanflip Ocularis"
+                                        :description "thin Asymmetrical"})
           (let [result (sut/get-products boundary {})]
-            (is (= 2 (count result)))))
+            (is (= 5 (count result)))))
+
+        (testing "filter"
+          (let [result (sut/get-products boundary {:name "R"})]
+            (is (= ["Slant Roller" "Stylus Revolve"] (map #(:name %) result))))
+          (let [result (sut/get-products boundary {:description "Asymmetric"})]
+            (is (= ["Torque X" "Beanflip Ocularis"] (map #(:name %) result)))))
 
         (testing "delete"
           (testing "正常"

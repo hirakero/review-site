@@ -46,7 +46,6 @@
 
       (testing "対象データが無ければ not found で何も返さない"
         (let [{:keys [status body]} (helper/http-get (str "/api/products/00000000-0000-0000-0000-000000000000"))]
-          (println "\nbody " body)
           (is (= 404 status))
           (is (nil? body)))))
 
@@ -64,10 +63,27 @@
       (helper/http-post "/api/products"
                         {:name "axiom ocuralis"
                          :description "ocuralis plug"})
+      (helper/http-post "/api/products"
+                        {:name "Slant Roller"
+                         :description "small"})
+      (helper/http-post "/api/products"
+                        {:name "Sparrow"
+                         :description "thin profile"})
       (let [{:keys [status body]} (helper/http-get "/api/products")]
         (is (= 200 status))
         (is (vector? (-> body :products)))
-        (is (= 2 (-> body :products count)))))
+        (is (= 4 (-> body :products count)))))
+
+    (testing "get /products?query"
+      (let [{:keys [status body]} (helper/http-get "/api/products?name=Sparrow")]
+        (is (= 200 status))
+        (is (= "Sparrow" (-> body :products first :name))))
+      (testing "対象データが無ければ404で何も返さない"
+        (let [{:keys [status body]} (helper/http-get "/api/products?name=Swarrow")]
+          (is (= 404 status))
+          (is (nil? body)))))
+
+
 
     (testing "delete"
       (testing "削除に成功したらno contentで何も返さない"

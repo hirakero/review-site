@@ -22,9 +22,14 @@
 (extend-protocol Products
   duct.database.sql.Boundary
 
-  (get-products [db query]
-    (let [result (-> (hh/select :*)
+  (get-products [db {:keys [name description]}]
+    (let [where (cond
+                  name [:like :name (str "%" name "%")]
+                  description [:like :description (str "%" description "%")]
+                  :else [])
+          result (-> (hh/select :*)
                      (hh/from :products)
+                     (hh/where where)
                      (sql/format)
                      (dbh/execute! db))]
       result))
