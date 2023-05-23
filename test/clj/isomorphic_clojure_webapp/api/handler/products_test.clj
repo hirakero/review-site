@@ -74,7 +74,7 @@
         (is (vector? (-> body :products)))
         (is (= 4 (-> body :products count)))))
 
-    (testing "get /products?query"
+    (testing "クエリパラメータで絞り込み"
       (let [{:keys [status body]} (helper/http-get "/api/products?name=Sparrow")]
         (is (= 200 status))
         (is (= "Sparrow" (-> body :products first :name))))
@@ -83,7 +83,11 @@
           (is (= 404 status))
           (is (nil? body)))))
 
-
+    (testing "クエリパラメータでページネーション"
+      (let [{:keys [status body]} (helper/http-get "/api/products?offset=2")]
+        (is (= 2 (-> body :products count))))
+      (let [{:keys [status body]} (helper/http-get "/api/products?limit=3")]
+        (is (= 3 (-> body :products count)))))
 
     (testing "delete"
       (testing "削除に成功したらno contentで何も返さない"

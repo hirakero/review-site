@@ -18,11 +18,13 @@
 
   (delete-product [db id]))
 
+(defn- p-long [x]
+  (if (string? x) (Long/parseLong x) x))
 
 (extend-protocol Products
   duct.database.sql.Boundary
 
-  (get-products [db {:keys [name description]}]
+  (get-products [db {:keys [name description limit offset]}]
     (let [where (cond
                   name [:like :name (str "%" name "%")]
                   description [:like :description (str "%" description "%")]
@@ -30,6 +32,8 @@
           result (-> (hh/select :*)
                      (hh/from :products)
                      (hh/where where)
+                     (hh/offset (if offset (p-long offset) []))
+                     (hh/limit (if limit (p-long limit) []))
                      (sql/format)
                      (dbh/execute! db))]
       result))

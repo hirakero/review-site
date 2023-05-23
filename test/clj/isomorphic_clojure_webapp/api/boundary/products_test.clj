@@ -14,6 +14,13 @@
       (jdbc/execute! ds ["delete from products"]))
     (f)))
 
+(comment
+  (let [boundary (:duct.database.sql/hikaricp system)
+        ds (-> boundary :spec :datasource)]
+    (jdbc/execute! ds #_[" SELECT * FROM products LIMIT ?" 4]
+                   #_[" SELECT * FROM products OFFSET ?" 2]
+                   [" SELECT * FROM products LIMIT ? OFFSET ?" 2 2])))
+
 (deftest products-boundary-test
   (let [boundary (:duct.database.sql/hikaricp system)]
     (testing "create"
@@ -67,10 +74,18 @@
           (let [result (sut/get-products boundary {:description "Asymmetric"})]
             (is (= ["Torque X" "Beanflip Ocularis"] (map #(:name %) result)))))
 
-        (testing "delete"
-          (testing "正常"
-            (let [result (sut/delete-product boundary id)]
-              (is (= id (:id result)))))
-          (testing "対象データが無いときはnil"
-            (let [result (sut/delete-product boundary "00000000-0000-0000-0000-000000000000")]
-              (is (= nil result)))))))))
+        (testing "limit offset"
+          (let [result (sut/get-products boundary {:limit 4})]
+            (is (= 4 (count result))))
+          (let [result (sut/get-products boundary {:offset 2})]
+            (is (= 3 (count result))))
+          (let [result (sut/get-products boundary {:offset 2 :limit 2})]
+            (is (= 2 (count result))))
+
+          (testing "delete"
+            (testing "正常"
+              (let [result (sut/delete-product boundary id)]
+                (is (= id (:id result)))))
+            (testing "対象データが無いときはnil"
+              (let [result (sut/delete-product boundary "00000000-0000-0000-0000-000000000000")]
+                (is (= nil result))))))))))
