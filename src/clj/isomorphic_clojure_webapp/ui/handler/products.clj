@@ -7,6 +7,10 @@
   {:status 200
    :headers {"content-type" "text/html"}
    :body (rum/render-html [:html
+                           [:head
+                            [:title "review site"]
+                            [:link {:rel "stylesheet"
+                                    :href "https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/light.min.css"}]]
                            [:body body]])})
 
 (defn see-other [location]
@@ -15,14 +19,15 @@
              "Location" location}})
 
 (defmethod ig/init-key ::list [_ _]
-  (fn [req]
-    (let [products (-> (helper/http-get "/api/products")
+  (fn [{qp :query-params}]
+    (let [query (->> (keys qp) (map #(str % "=" (get qp %))) (clojure.string/join "&"))
+          products (-> (helper/http-get (str "/api/products" (when-not (empty? query) (str "?" query))))
                        :body
                        :products)]
       (ok [:h2 "product list"]
+          [:a {:href "/ui/products/create"} "create"]
           [:ul (for [{:keys [name id]} products]
-                 [:li [:a {:href (str "/ui/products/detail/" id)} name]])]
-          [:a {:href "/ui/products/create"} "create"]))))
+                 [:li [:a {:href (str "/ui/products/detail/" id)} name]])]))))
 
 (defmethod ig/init-key ::detail [_ _]
   (fn [{{:keys [product-id]} :path-params}]
