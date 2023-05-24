@@ -4,8 +4,9 @@
             [ring.util.response :as rres]))
 
 (defmethod ig/init-key ::all [_ {:keys [db]}]
-  (fn [req]
-    (let [result (products/get-products db {})]
+  (fn [{:keys [query-params]}]
+    (let [new-params (zipmap (->> query-params keys (map keyword)) (vals query-params))
+          result (products/get-products db new-params)]
       (if (empty? result)
         (rres/not-found nil)
         (rres/response {:products result})))))
