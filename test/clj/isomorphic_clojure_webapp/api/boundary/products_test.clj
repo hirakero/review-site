@@ -14,6 +14,13 @@
       (jdbc/execute! ds ["delete from products"]))
     (f)))
 
+(comment
+  (let [boundary (:duct.database.sql/hikaricp system)
+        ds (-> boundary :spec :datasource)]
+    (jdbc/execute! ds #_[" SELECT * FROM products LIMIT ?" 4]
+                   #_[" SELECT * FROM products OFFSET ?" 2]
+                   [" SELECT * FROM products LIMIT ? OFFSET ?" 2 2])))
+
 (deftest products-boundary-test
   (let [boundary (:duct.database.sql/hikaricp system)]
     (testing "create"
@@ -41,8 +48,8 @@
 
         (testing "update"
           (testing "正常"
-            (let [result (sut/update-product boundary id {:name "Sparrow"})]
-              (is (= "Sparrow"  (:name result)))
+            (let [result (sut/update-product boundary id {:name "Torque X"})]
+              (is (= "Torque X"  (:name result)))
               result))
           (testing "対象データが無いときはnil"
             (let [result (sut/update-product boundary "00000000-0000-0000-0000-000000000000" {:name "Sparrow"})]
@@ -52,13 +59,33 @@
         (testing "all"
           (sut/create-product boundary {:name "Slant Roller"
                                         :description "small"})
+          (sut/create-product boundary {:name "Flippin' Pickle"
+                                        :description "pfs"})
+          (sut/create-product boundary {:name "Stylus Revolve"
+                                        :description "thin profile"})
+          (sut/create-product boundary {:name "Beanflip Ocularis"
+                                        :description "thin Asymmetrical"})
           (let [result (sut/get-products boundary {})]
-            (is (= 2 (count result)))))
+            (is (= 5 (count result)))))
 
-        (testing "delete"
-          (testing "正常"
-            (let [result (sut/delete-product boundary id)]
-              (is (= id (:id result)))))
-          (testing "対象データが無いときはnil"
-            (let [result (sut/delete-product boundary "00000000-0000-0000-0000-000000000000")]
-              (is (= nil result)))))))))
+        (testing "filter"
+          (let [result (sut/get-products boundary {:name "R"})]
+            (is (= ["Slant Roller" "Stylus Revolve"] (map #(:name %) result))))
+          (let [result (sut/get-products boundary {:description "Asymmetric"})]
+            (is (= ["Torque X" "Beanflip Ocularis"] (map #(:name %) result)))))
+
+        (testing "limit offset"
+          (let [result (sut/get-products boundary {:limit 4})]
+            (is (= 4 (count result))))
+          (let [result (sut/get-products boundary {:offset 2})]
+            (is (= 3 (count result))))
+          (let [result (sut/get-products boundary {:offset 2 :limit 2})]
+            (is (= 2 (count result))))
+
+          (testing "delete"
+            (testing "正常"
+              (let [result (sut/delete-product boundary id)]
+                (is (= id (:id result)))))
+            (testing "対象データが無いときはnil"
+              (let [result (sut/delete-product boundary "00000000-0000-0000-0000-000000000000")]
+                (is (= nil result))))))))))
