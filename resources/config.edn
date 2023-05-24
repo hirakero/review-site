@@ -11,7 +11,18 @@
                                  :responses {:absolute-redirects true}}
 
   :duct.router/reitit
+
   {:routes [["/" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.app/index}]
+            ["/ui"
+             ["/products"
+              ["" #ig/ref :isomorphic-clojure-webapp.ui.handler.products/list]
+              ["/create" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.products/create
+                          :post #ig/ref :isomorphic-clojure-webapp.ui.handler.products/create-post}]
+              ["/detail/:product-id" #ig/ref :isomorphic-clojure-webapp.ui.handler.products/detail]
+              ["/edit/:product-id" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.products/edit
+                                    :post #ig/ref :isomorphic-clojure-webapp.ui.handler.products/edit-post}]
+              ["/delete/:product-id" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.products/delete
+                                      :post #ig/ref :isomorphic-clojure-webapp.ui.handler.products/delete-post}]]]
             ["/api"
              ["/users"
               ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.users/all
@@ -43,6 +54,15 @@
                ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/fetch
                     :put #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/update
                     :delete #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/delete}]]]]]}
+
+  :isomorphic-clojure-webapp.ui.handler.products/list {}
+  :isomorphic-clojure-webapp.ui.handler.products/detail {}
+  :isomorphic-clojure-webapp.ui.handler.products/create {}
+  :isomorphic-clojure-webapp.ui.handler.products/create-post {}
+  :isomorphic-clojure-webapp.ui.handler.products/edit {}
+  :isomorphic-clojure-webapp.ui.handler.products/edit-post {}
+  :isomorphic-clojure-webapp.ui.handler.products/delete {}
+  :isomorphic-clojure-webapp.ui.handler.products/delete-post {}
 
   :isomorphic-clojure-webapp.api.handler.app/index {}
   :isomorphic-clojure-webapp.api.handler.users/all {:db #ig/ref :duct.database.sql/hikaricp}
