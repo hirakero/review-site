@@ -5,8 +5,10 @@
 
 (defmethod ig/init-key ::all [_ {:keys [db]}]
   (fn [{:keys [query-params]}]
-    (let [new-params (zipmap (->> query-params keys (map keyword)) (vals query-params))
-          result (products/get-products db new-params)]
+    (let [kw-key-params (zipmap (->> query-params keys (map keyword)) (vals query-params))  ;TODO もっとシンプルに
+          kw-val-key  (filter #(contains? kw-key-params %) [:sort :order])         ;←このキーの値はkeywordにする
+          kw-val-params (reduce #(update %1 %2 keyword) kw-key-params kw-val-key)
+          result (products/get-products db kw-val-params)]
       (if (empty? result)
         (rres/not-found nil)
         (rres/response {:products result})))))
