@@ -87,14 +87,19 @@
       (let [{:keys [status body]} (helper/http-get "/api/products?offset=2")]
         (is (= 2 (-> body :products count))))
       (let [{:keys [status body]} (helper/http-get "/api/products?limit=3")]
-        (is (= 3 (-> body :products count)))))
-
+        (is (= 3 (-> body :products count))))
+      (testing "offset,limit 数値以外は400"
+        (let [{:keys [status body]} (helper/http-get "/api/products?offset=a&limit=b")]
+          (is (= 400 status)))))
 
     (testing "クエリパラメータでソート"
       (let [{:keys [status body]} (helper/http-get "/api/products?sort=name&order=desc")]
         (is (= ["Sparrow" "Slant Roller" "Hammer LT" "axiom ocuralis"] (->> body :products (map #(:name %))))))
       (let [{:keys [status body]} (helper/http-get "/api/products?sort=name")]
-        (is (= ["axiom ocuralis" "Hammer LT" "Slant Roller" "Sparrow"] (->> body :products (map #(:name %)))))))
+        (is (= ["axiom ocuralis" "Hammer LT" "Slant Roller" "Sparrow"] (->> body :products (map #(:name %))))))
+      (testing "orderのasc,desc以外は400"
+        (let [{:keys [status body]} (helper/http-get "/api/products?sort=name&order=abc")]
+          (is (= 400 status)))))
 
     (testing "delete"
       (testing "削除に成功したらno contentで何も返さない"
