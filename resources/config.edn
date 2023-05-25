@@ -39,7 +39,8 @@
                                 :handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/signin}}]
 
              ["/products"
-              ["" {:get  #ig/ref :isomorphic-clojure-webapp.api.handler.products/all
+              ["" {:get  {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.products/all
+                          :parameters {:query :isomorphic-clojure-webapp.spec.products/query-params}}
                    :post #ig/ref :isomorphic-clojure-webapp.api.handler.products/create}]
               ["/:product-id"
                ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.products/fetch

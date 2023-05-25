@@ -24,7 +24,7 @@
 (extend-protocol Products
   duct.database.sql.Boundary
 
-  (get-products [db {:keys [name description limit offset]}]
+  (get-products [db {:keys [name description limit offset sort order]}]
     (let [where (cond
                   name [:like :name (str "%" name "%")]
                   description [:like :description (str "%" description "%")]
@@ -34,7 +34,11 @@
                      (hh/where where)
                      (hh/offset (if offset (p-long offset) []))
                      (hh/limit (if limit (p-long limit) []))
+                     (#(if-not (nil? sort)
+                         (hh/order-by % [sort order])
+                         %))
                      (sql/format)
+                     #_((fn [s] (println "\nsql " s) (def *sql s) s))
                      (dbh/execute! db))]
       result))
 
