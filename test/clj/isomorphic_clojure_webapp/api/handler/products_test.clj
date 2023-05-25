@@ -89,6 +89,13 @@
       (let [{:keys [status body]} (helper/http-get "/api/products?limit=3")]
         (is (= 3 (-> body :products count)))))
 
+
+    (testing "クエリパラメータでソート"
+      (let [{:keys [status body]} (helper/http-get "/api/products?sort=name&order=desc")]
+        (is (= ["Sparrow" "Slant Roller" "Hammer LT" "axiom ocuralis"] (->> body :products (map #(:name %))))))
+      (let [{:keys [status body]} (helper/http-get "/api/products?sort=name")]
+        (is (= ["axiom ocuralis" "Hammer LT" "Slant Roller" "Sparrow"] (->> body :products (map #(:name %)))))))
+
     (testing "delete"
       (testing "削除に成功したらno contentで何も返さない"
         (let [{:keys [status body]} (helper/http-delete (str "/api/products/" id))]
