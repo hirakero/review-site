@@ -39,13 +39,15 @@
                                 :handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/signin}}]
 
              ["/products"
-              ["" {:get  {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.products/all
-                          :parameters {:query :isomorphic-clojure-webapp.spec.products/query-params}}
-                   :post #ig/ref :isomorphic-clojure-webapp.api.handler.products/create}]
-              ["/:product-id"
-               ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.products/fetch
-                    :put #ig/ref :isomorphic-clojure-webapp.api.handler.products/update
-                    :delete #ig/ref :isomorphic-clojure-webapp.api.handler.products/delete}]
+              ["" {:get  {:parameters {:query :isomorphic-clojure-webapp.spec.products/query}
+                          :handler #ig/ref :isomorphic-clojure-webapp.api.handler.products/all}
+                   :post {:parameters {:body :isomorphic-clojure-webapp.spec.products/post-body}
+                          :handler #ig/ref :isomorphic-clojure-webapp.api.handler.products/create}}]
+              ["/:product-id" {:parameters {:path :isomorphic-clojure-webapp.spec.products/product-path}}
+               ["" {:get {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.products/fetch}
+                    :put {:parameters {:body :isomorphic-clojure-webapp.spec.products/put-body}
+                          :handler #ig/ref :isomorphic-clojure-webapp.api.handler.products/update}
+                    :delete {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.products/delete}}]
                ["/reviews" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/all}]]]
 
              ["/reviews"
