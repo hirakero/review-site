@@ -24,14 +24,17 @@
     (f)))
 
 (deftest handler-products-test
-  (let [{:keys [status body] :as all} (helper/http-get "/api/products")]
-    (testing "get /products データがない場合は404で、何も返さない" ; <- products [] ?
+  (let [{:keys [status body]} (helper/http-get "/api/products")]
+    (testing "get /products データがない場合は404で、 :products nil を返す"
       (is (=  404 status))
-      (is (nil? body))))
+      (is (contains? body :products))
+      (is (nil? (:products body)))
+      (is (= "resource-not-found" (:error body)))))
   (let [{:keys [status headers body]} (helper/http-post "/api/products"
                                                         {:name "Hammer XT"
                                                          :description "for hammer grip"})
         id (:id body)]
+
     (testing "post /products"
       (testing " 登録した内容を直接返す"
         (is (= 201 status))
@@ -39,34 +42,31 @@
         (is (= "Hammer XT" (:name body)))
         (is (= "for hammer grip" (:description body))))
 
-      #_(testing " 空bodyは 400"  ;<-
-          (let [{:keys [status body]} (helper/http-post "/api/products/"
-                                                        {})]
-            (is (= 400 status))
-            #_(is (= "" (-> body :errors first))) ;<-
-            ))
-      #_(testing "フィールドの型が合わない場合は 400"  ;<-
-          (let [{:keys [status body]} (helper/http-post "/api/products/"
-                                                        {:name 100
-                                                         :description 200})]
-            (is (= 400 status))
-            [status body]
-            #_(is (= "" (-> body :errors first))) ;<-
-            ))
-      #_(testing "POST /products フィールドが足りない場合は 400" ;<
-          (let [{:keys [status body]} (helper/http-post "/api/products/"
-                                                        {:name "cleaver pro"})]
-            (is (= 400 status))
-            [status body]
-            #_(is (= "" (-> body :errors first))) ;<-
-            ))
+      (testing " 空bodyは 400"  ;<-
+        (let [{:keys [status body]} (helper/http-post "/api/products"
+                                                      {})]
+          (is (= 400 status))
+          #_(is (= "" (-> body :errors first))) ;<-
+          ))
+      (testing "フィールドの型が合わない場合は 400"  ;<-
+        (let [{:keys [status body]} (helper/http-post "/api/products"
+                                                      {:name 100
+                                                       :description 200})]
+          (is (= 400 status))
+          #_(is (= "" (-> body :errors first))) ;<-
+          ))
+      (testing "POST /products フィールドが足りない場合は 400" ;<
+        (let [{:keys [status body]} (helper/http-post "/api/products"
+                                                      {:name "cleaver pro"})]
+          (is (= 400 status))
+          #_(is (= "" (-> body :errors first))) ;<-
+          ))
       (testing "POST /products/:idは 405"
         (let [{:keys [status body]} (helper/http-post (str "/api/products/" id)
                                                       {:name "Hammer LT"
                                                        :description "for hammer grip"})]
           (is (= 405 status))
-          #_(is (= "" (-> body :errors first))) ;<-
-          )))
+          (is (= "method-not-allowed" (:error body))))))
 
     (testing "get /products/:product-id "
       (testing "取得した内容を返す"
@@ -74,10 +74,11 @@
           (is (= 200 status))
           (is (= "Hammer XT" (-> body :product :name)))))
 
-      (testing "対象データが無ければ not found で何も返さない" ; <- ?
+      (testing "対象データが無ければ 404 で, :user nilを返す"
         (let [{:keys [status body]} (helper/http-get (str "/api/products/00000000-0000-0000-0000-000000000000"))]
           (is (= 404 status))
-          (is (nil? body)))) ;<-?
+          (is (contains? body :product))
+          (is (nil? (:product body)))))
 
       (testing ":id がUUIDでなければ 400 とメッセージ" ; <- ?
         (let [{:keys [status body]} (helper/http-get (str "/api/products/123"))]
@@ -90,16 +91,17 @@
         (let [{:keys [status body]} (helper/http-put (str "/api/products/" id) {:name "Hammer LT"})]
           (is (= 200 status))
           (is (= "Hammer LT" (-> body :name)))))
-      (testing "対象データが無ければ not found で何も返さない" ;<- ?
+      (testing "対象データが無ければ404で、 :error \"not found\" を返す"
         (let [{:keys [status body]} (helper/http-put "/api/products/00000000-0000-0000-0000-000000000000"
                                                      {:name "Hammer LT"})]
           (is (= 404 status))
-          (is (nil? body)))) ;<-
+          (is (= "resource-not-found" (:error body)))))
       (testing ":user-idの型違いは400"
         (let [{:keys [status body]} (helper/http-put "/api/products/123"
                                                      {:name "Hammer LT"})]
           (is (= 400 status))
-          #_(is (nil? body));<-))
+          #_(is (nil? body));<-
+          ))
       (testing "bodyのフィールド名違いは400"
         (let [{:keys [status body]} (helper/http-put (str "/api/products/" id)
                                                      {:title "Hammer LT"})]
@@ -110,7 +112,7 @@
         (let [{:keys [status body]} (helper/http-put "/api/products"
                                                      {:name "Hammer LT"})]
           (is (= 405 status))
-          #_(is (nil? body)))))
+          (is (= "method-not-allowed" (:error body))))))
 
     (testing "get /products"
       (helper/http-post "/api/products"
@@ -133,10 +135,12 @@
           (let [{:keys [status body]} (helper/http-get "/api/products?name=Sparrow")]
             (is (= 200 status))
             (is (= "Sparrow" (-> body :products first :name)))))
-        (testing "対象データが無ければ404で何も返さない" ;<-
+        (testing "対象データが無ければ404で、:products nilを返す"
           (let [{:keys [status body]} (helper/http-get "/api/products?name=abc")]
             (is (= 404 status))
-            (is (nil? body)))));<-?
+            (is (contains? body :products))
+            (is (nil? (:products body)))
+            (is (= "resource-not-found" (:error body))))))
 
       (testing "クエリパラメータでページネーション"
         (testing ""
@@ -164,16 +168,16 @@
           (is (= 204 status))
           (is (nil? body))))
 
-      (testing "対象データが無ければ not foundで何も返さない" ;<-?
+      (testing "対象データが無ければ 404で、:error \"not found\" を返す"
         (let [{:keys [status body]} (helper/http-delete "/api/products/00000000-0000-0000-0000-000000000000")]
           (is (= 404 status))
-          #_(is (nil? body)))) ;<-?
+          (is (= "resource-not-found" (:error body)))))
 
       (testing ":product-idの型が違っていれば400"
         (let [{:keys [status body]} (helper/http-delete "/api/products/123")]
           (is (= 400 status))
           #_(is (nil? body))));<-
-      (testing ":product-idのなしは405"
+      (testing ":product-id なしは405"
         (let [{:keys [status body]} (helper/http-delete "/api/products")]
           (is (= 405 status))
-          #_(is (nil? body)))))))
+          (is (= "method-not-allowed" (:error body))))))))
