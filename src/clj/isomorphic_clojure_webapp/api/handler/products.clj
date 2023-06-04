@@ -3,7 +3,7 @@
             [isomorphic-clojure-webapp.api.boundary.products :as products]
             [ring.util.response :as rres]))
 
-(defmethod ig/init-key ::all [_ {:keys [db]}]
+(defmethod ig/init-key ::list [_ {:keys [db]}]
   (fn [{:keys [query-params]}]
     (let [kw-key-params (zipmap (->> query-params keys (map keyword)) (vals query-params))  ;TODO もっとシンプルに
           kw-val-key  (filter #(contains? kw-key-params %) [:sort :order])         ;←このキーの値はkeywordにする

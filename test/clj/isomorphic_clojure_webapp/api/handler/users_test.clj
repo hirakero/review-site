@@ -38,9 +38,9 @@
                                              :message "not found"}]}}))
 
 #_(deftest users-handler-mock-test
-    (testing "all "
+    (testing "list "
       (let [request (mock/request :get "/api/users")
-            handler (ig/init-key :isomorphic-clojure-webapp.handler.users/all
+            handler (ig/init-key :isomorphic-clojure-webapp.handler.users/list
                                  {:db database-stub-normal})
             {:keys [status body]} (handler request)]
         (is (= 200 status))

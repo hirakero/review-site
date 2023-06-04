@@ -25,14 +25,14 @@
                                       :post #ig/ref :isomorphic-clojure-webapp.ui.handler.products/delete-post}]]]
             ["/api"
              ["/users"
-              ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.users/all
+              ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.users/list
                    :post #ig/ref :isomorphic-clojure-webapp.api.handler.users/create}]
               ["/:user-id"
                ["" {:get  #ig/ref :isomorphic-clojure-webapp.api.handler.users/fetch
                     :put {:parameters {:body :isomorphic-clojure-webapp.spec.users/put-body}
                           :handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/update}
                     :delete #ig/ref :isomorphic-clojure-webapp.api.handler.users/delete}]
-               ["/reviews" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/all}]]]
+               ["/reviews" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/list}]]]
              ["/login" {:post {:parameters {:body :isomorphic-clojure-webapp.spec.users/login-body}
                                :handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/login}}]
              ["/signin" {:post {:parameters {:body :isomorphic-clojure-webapp.spec.users/signin-body}
@@ -40,7 +40,7 @@
 
              ["/products"
               ["" {:get  {:parameters {:query :isomorphic-clojure-webapp.spec.products/query}
-                          :handler #ig/ref :isomorphic-clojure-webapp.api.handler.products/all}
+                          :handler #ig/ref :isomorphic-clojure-webapp.api.handler.products/list}
                    :post {:parameters {:body :isomorphic-clojure-webapp.spec.products/post-body}
                           :handler #ig/ref :isomorphic-clojure-webapp.api.handler.products/create}}]
               ["/:product-id" {:parameters {:path :isomorphic-clojure-webapp.spec.products/product-path}}
@@ -48,10 +48,11 @@
                     :put {:parameters {:body :isomorphic-clojure-webapp.spec.products/put-body}
                           :handler #ig/ref :isomorphic-clojure-webapp.api.handler.products/update}
                     :delete {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.products/delete}}]
-               ["/reviews" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/all}]]]
+               ["/reviews" {#_:post
+                            :get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/list}]]]
 
              ["/reviews"
-              ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/all
+              ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/list
                    :post #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/create}]
               ["/:review-id"
                ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/fetch
@@ -68,7 +69,7 @@
   :isomorphic-clojure-webapp.ui.handler.products/delete-post {}
 
   :isomorphic-clojure-webapp.api.handler.app/index {}
-  :isomorphic-clojure-webapp.api.handler.users/all {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.api.handler.users/list {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.users/create {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.users/fetch {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.users/update {:db #ig/ref :duct.database.sql/hikaricp}
@@ -76,13 +77,13 @@
   :isomorphic-clojure-webapp.api.handler.users/login {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.users/signin {:db #ig/ref :duct.database.sql/hikaricp}
 
-  :isomorphic-clojure-webapp.api.handler.products/all {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.api.handler.products/list {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.products/create {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.products/fetch {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.products/update {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.products/delete {:db #ig/ref :duct.database.sql/hikaricp}
 
-  :isomorphic-clojure-webapp.api.handler.reviews/all {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.api.handler.reviews/list {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.reviews/create {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.reviews/fetch {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.reviews/update {:db #ig/ref :duct.database.sql/hikaricp}

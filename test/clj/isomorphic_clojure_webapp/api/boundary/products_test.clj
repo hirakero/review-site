@@ -59,7 +59,7 @@
             (is (= nil result))
             result)))
 
-      (testing "all"
+      (testing "list"
         (sut/create-product boundary {:name "Slant Roller"
                                       :description "small"})
         (sut/create-product boundary {:name "Flippin' Pickle"
