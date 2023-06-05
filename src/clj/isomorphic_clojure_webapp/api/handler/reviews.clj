@@ -1,7 +1,7 @@
 (ns isomorphic-clojure-webapp.api.handler.reviews
   (:require [integrant.core :as ig]))
 
-(defmethod ig/init-key ::all [_ {:keys [db]}]
+(defmethod ig/init-key ::list [_ {:keys [db]}]
   (fn [req]))
 (defmethod ig/init-key ::fetch [_ {:keys [db]}]
   (fn [req]))

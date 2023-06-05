@@ -3,7 +3,7 @@
             [isomorphic-clojure-webapp.api.boundary.users :as users]
             [ring.util.response :as rres]))
 
-(defmethod ig/init-key ::all [_ {:keys [db]}]
+(defmethod ig/init-key ::list [_ {:keys [db]}]
   (fn [req]
     (let [result (users/get-users db)]
       (if (empty? result)

@@ -29,7 +29,7 @@
 
 (deftest users-boundary-test
   (let [boundary (:duct.database.sql/hikaricp system)]
-    (testing "all"
+    (testing "list"
       (let [result (users/get-users boundary)]
         (is (= [] result))))
     (testing "create"
@@ -65,7 +65,7 @@
                                                        :email "alice@example.com"})]
             (is (match? {:name "Alice"
                          :email "alice@example.com"} result))))
-        (testing "all"
+        (testing "list"
           (users/create-user boundary {:name "Bob"
                                        :email "bob@examile.com"
                                        :password "password"})
