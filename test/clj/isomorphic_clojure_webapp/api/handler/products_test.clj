@@ -38,29 +38,26 @@
     (testing "post /products"
       (testing " 登録した内容を直接返す"
         (is (= 201 status))
-        (is (get headers "location")) ;<-
+        (is (get headers "location"))
         (is (= "Hammer XT" (:name body)))
         (is (= "for hammer grip" (:description body))))
 
-      (testing " 空bodyは 400"  ;<-
+      (testing " 空bodyは 400"
         (let [{:keys [status body]} (helper/http-post "/api/products"
                                                       {})]
           (is (= 400 status))
-          #_(is (= "" (-> body :errors first))) ;<-
-          ))
-      (testing "フィールドの型が合わない場合は 400"  ;<-
+          (is (contains? body :spec))))
+      (testing "フィールドの型が合わない場合は 400"
         (let [{:keys [status body]} (helper/http-post "/api/products"
                                                       {:name 100
                                                        :description 200})]
           (is (= 400 status))
-          #_(is (= "" (-> body :errors first))) ;<-
-          ))
-      (testing "POST /products フィールドが足りない場合は 400" ;<
+          (is (contains? body :spec))))
+      (testing "POST /products フィールドが足りない場合は 400"
         (let [{:keys [status body]} (helper/http-post "/api/products"
                                                       {:name "cleaver pro"})]
           (is (= 400 status))
-          #_(is (= "" (-> body :errors first))) ;<-
-          ))
+          (is (contains? body :spec))))
       (testing "POST /products/:idは 405"
         (let [{:keys [status body]} (helper/http-post (str "/api/products/" id)
                                                       {:name "Hammer LT"
@@ -80,11 +77,10 @@
           (is (contains? body :product))
           (is (nil? (:product body)))))
 
-      (testing ":id がUUIDでなければ 400 とメッセージ" ; <- ?
+      (testing ":id がUUIDでなければ 400 とメッセージ"
         (let [{:keys [status body]} (helper/http-get (str "/api/products/123"))]
           (is (= 400 status))
-          #_(is (nil? body))));coercionのメッセージのままでOK?
-      )
+          (is (contains? body :spec)))))
 
     (testing "put /products/:product-id"
       (testing "更新した内容を直接返す"
@@ -100,13 +96,12 @@
         (let [{:keys [status body]} (helper/http-put "/api/products/123"
                                                      {:name "Hammer LT"})]
           (is (= 400 status))
-          #_(is (nil? body));<-
-          ))
+          (is (contains? body :spec))))
       (testing "bodyのフィールド名違いは400"
         (let [{:keys [status body]} (helper/http-put (str "/api/products/" id)
                                                      {:title "Hammer LT"})]
           (is (= 400 status))
-          #_(is (= "" (-> body :name)))))
+          (is (contains? body :spec))))
 
       (testing ":product-idなし405"
         (let [{:keys [status body]} (helper/http-put "/api/products"
@@ -176,7 +171,7 @@
       (testing ":product-idの型が違っていれば400"
         (let [{:keys [status body]} (helper/http-delete "/api/products/123")]
           (is (= 400 status))
-          #_(is (nil? body))));<-
+          (is (contains? body :spec))))
       (testing ":product-id なしは405"
         (let [{:keys [status body]} (helper/http-delete "/api/products")]
           (is (= 405 status))

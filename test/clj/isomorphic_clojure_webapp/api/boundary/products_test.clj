@@ -92,6 +92,20 @@
           (is (= 3 (count result))))
         (let [result (sut/get-products boundary {:offset 2 :limit 2})]
           (is (= 2 (count result)))))
+      #_(doseq [i (range 10)]
+          (sut/create-product boundary {:name (str i)
+                                        :description ""}))
+      #_(testing "has-prev,has-next"
+          (let [{:keys [has-next has-prev]} (sut/get-products boundary {:limit 5})]
+            (is (false? has-prev))
+            (is (true? has-next))))
+
+      (doseq [i (range 10 200)]
+        (sut/create-product boundary {:name (str i)
+                                      :description ""}))
+      (testing "limitの上限あり"
+        (let [result (sut/get-products boundary {:limit 200})]
+          (is (= 100 (count result)))))
 
       (testing "delete"
         (testing "正常"

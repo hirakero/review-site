@@ -21,6 +21,7 @@
 (defn- p-long [x]
   (if (string? x) (Long/parseLong x) x))
 
+(def max-limit 100)
 (extend-protocol Products
   duct.database.sql.Boundary
 
@@ -29,11 +30,18 @@
                   name [:like :name (str "%" name "%")]
                   description [:like :description (str "%" description "%")]
                   :else [])
+          lmt (if limit
+                (let [l (p-long limit)]
+                  (if (< max-limit l)
+                    max-limit
+                    l))
+                max-limit)
+          ofs (if offset (p-long offset) 0)
           result (-> (hh/select :*)
                      (hh/from :products)
                      (hh/where where)
-                     (hh/offset (if offset (p-long offset) []))
-                     (hh/limit (if limit (p-long limit) []))
+                     (hh/offset ofs)
+                     (hh/limit lmt)
                      (#(if-not (nil? sort)
                          (hh/order-by % [sort order])
                          %))
