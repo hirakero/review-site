@@ -45,7 +45,8 @@
                                    [ring/ring-mock "0.4.0"]
                                    [com.gearswithingears/shrubbery "0.4.1"]
                                    [nubank/mockfn "0.7.0"]
-                                   [nubank/matcher-combinators "3.8.5"]]
+                                   [nubank/matcher-combinators "3.8.5"]
+                                   [buddy "2.0.0"]]
                   :aliases {"idiom:check" ["do"
                                            ["eastwood"]
                                            ["run" "-m" "clj-kondo.main" "--lint" "src" "test"]
