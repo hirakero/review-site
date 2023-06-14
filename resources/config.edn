@@ -90,7 +90,8 @@
   :isomorphic-clojure-webapp.api.handler.reviews/delete {:db #ig/ref :duct.database.sql/hikaricp}
 
   :duct.migrator/ragtime {:migrations [#ig/ref :review-site.migration/create-users-table
-                                       #ig/ref :review-site.migration/create-products-table]}
+                                       #ig/ref :review-site.migration/create-products-table
+                                       #ig/ref :review-site.migration/create-reviews-table]}
 
   [:duct.migrator.ragtime/sql :review-site.migration/create-users-table]
   {:up ["CREATE TABLE users (id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
@@ -107,7 +108,18 @@
                            description TEXT,
                            created TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
                            updated TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP);"]
-   :down ["DROP TABLE products;"]}}
+   :down ["DROP TABLE products;"]}
+
+  [:duct.migrator.ragtime/sql :review-site.migration/create-reviews-table]
+  {:up ["CREATE TABLE reviews (id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
+                           user_id UUID NOT NULL,
+                           product_id UUID NOT NULL,
+                           title TEXT ,
+                           content TEXT ,
+                           rate INT ,
+                           created TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                           updated TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP);"]
+   :down ["DROP TABLE users;"]}}
 
  :duct.profile/dev   #duct/include "dev"
  :duct.profile/local #duct/include "local"
