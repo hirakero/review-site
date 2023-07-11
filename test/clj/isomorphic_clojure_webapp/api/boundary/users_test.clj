@@ -69,7 +69,7 @@
                          :email "alice@example.com"} result))))
         (testing "list"
           (users/create-user boundary {:name "Bob"
-                                       :email "bob@examile.com"
+                                       :email "bob@example.com"
                                        :password "password"})
           (let [result (users/get-users boundary)]
             (is (= 2 (count result)))
@@ -81,10 +81,10 @@
 
         (testing "login" ;一時的に
           (let [result (users/login boundary {:name "Bob"
-                                              :email "bob@examile.com"
+                                              :email "bob@example.com"
                                               :password "password"})]
             (is (match? {:name "Bob"
-                         :email "bob@examile.com"} result))))))
+                         :email "bob@example.com"} result))))))
     #_(testing "create 異常"
         (let [result (users/create-user boundary {:namae "Aida"})]
           #_(is ((-> result)))

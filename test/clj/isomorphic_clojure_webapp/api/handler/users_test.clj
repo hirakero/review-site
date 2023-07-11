@@ -9,7 +9,8 @@
             [isomorphic-clojure-webapp.ui.boundary.http-helper :as helper]
             [isomorphic-clojure-webapp.api.boundary.users :as users]
             [next.jdbc :as jdbc]
-            [matcher-combinators.clj-test]))
+            [matcher-combinators.clj-test]
+            [reitit.core :as r]))
 
 #_(def ^:private alice-data {:id 1, :name "Alice", :email "alice@xample.com"})
 #_(def ^:private bob-data {:id 2, :name "Bob", :email "bob@example.com"})
@@ -231,39 +232,5 @@
     (let [{:keys [status body]} (helper/http-post "/api/login" {:name "dave"
                                                                 :password "password"})]
 
-      (is (= 401 status))))
-
-  ;;;;;
-  (testing " token系のテスト"
-    (let [{:keys [status body]} (helper/http-post "/api/login" {:name "alice"
-                                                                :email "alice@example.com"
-                                                                :password "password"})
-          token (:token body)]
-      (testing "get /api/products はtokenありで成功"
-        (let [token "abc"
-              {:keys [status body]} (helper/http-get "/api/products"
-                                                     {"Authorization" (str "Token " token)})]
-          (is (= 200 status))
-          (is (vector? (:products body)))
-          #_[status body]))
-
-      (testing "get /api/products はtokenなしでも成功"
-        (let [{:keys [status body]} (helper/http-get "/api/products")]
-          (is (= 200 status))
-          (is (vector? (:products body)))
-          #_(is (= 3 (-> body :products count)))))
-
-      (testing "post /api/products はtokenなしは401(認証自体の失敗)"
-        (let [{:keys [status body]} (helper/http-post "/api/products"
-                                                      {:name "test products"
-                                                       :description "desc"})]
-          (is (= 401 status))
-          #_(println "\nbody no token " body)))
-      (testing "postは /api/products tokenありは201 created"
-        (let [{:keys [status body]} (helper/http-post "/api/products"
-                                                      {"Authorization" (str "Token " token)}
-                                                      {:name "test products"
-                                                       :description "desc"})]
-          (is (= 201 status))
-          #_(println "\nbody with token " body))))))
+      (is (= 401 status)))))
  

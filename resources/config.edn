@@ -29,6 +29,8 @@
 
             ["/api" {:middleware [#ig/ref :duct.middleware.buddy/authentication]}
              ["/health" {:get {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.app/health}}]
+             ["/health-auth" {:get {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.app/health
+                                    :middleware [#ig/ref :isomorphic-clojure-webapp.api.auth/wrap-user-only]}}]
              ["/users"
               ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.users/list
                    :post #ig/ref :isomorphic-clojure-webapp.api.handler.users/create}]
@@ -36,7 +38,7 @@
                ["" {:get  #ig/ref :isomorphic-clojure-webapp.api.handler.users/fetch
                     :put {:parameters {:body :isomorphic-clojure-webapp.spec.users/put-body}
                           :handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/update}
-                    :delete #ig/ref :isomorphic-clojure-webapp.api.handler.users/delete}]
+                    :delete {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/delete}}]
                ["/reviews" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/list}]]]
              ["/login" {:post {:parameters {:body :isomorphic-clojure-webapp.spec.users/login-body}
                                :handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/login}}]
@@ -73,8 +75,10 @@
   :isomorphic-clojure-webapp.ui.handler.products/delete {}
   :isomorphic-clojure-webapp.ui.handler.products/delete-post {}
 
+
   :isomorphic-clojure-webapp.api.handler.app/index {}
   :isomorphic-clojure-webapp.api.handler.app/health {}
+  :isomorphic-clojure-webapp.api.auth/wrap-user-only {}
   :isomorphic-clojure-webapp.api.handler.users/list {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.users/create {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.users/fetch {:db #ig/ref :duct.database.sql/hikaricp}
