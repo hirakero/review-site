@@ -5,11 +5,20 @@
             #_[buddy.sign.jws :as jws]
             [ring.util.response :as rres]))
 
-(def secret-key "SECRET-KEY")
+(def secret-key "SECRET-KEY") ;TODO  環境変数から
+(def exp-second 3600)
 (def backend (backends/jws {:secret secret-key}))
 
-(defn create-token [payload]
-  (jwt/sign payload secret-key))
+(defn create-token
+  "ユーザー情報のマップを受け取り、その情報をもとにjwsを返す"
+  [user]
+  (jwt/sign
+   {:sub {:id (:id user)
+          #_#_:name (:name user)}
+    :exp (-> (System/currentTimeMillis)
+             (quot  1000)
+             (+ exp-second))}
+   secret-key))
 
 #_(defn wrap-jwt-authentication [handler]
     (wrap-authentication handler backend))

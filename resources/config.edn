@@ -10,8 +10,11 @@
                                           :multipart true}
                                  :responses {:absolute-redirects true}}
 
-  :duct.router/reitit
+  :duct.middleware.buddy/authentication
+  {:backend :jws
+   :secret "SECRET-KEY" #_#duct/env "SECRET-KEY"}
 
+  :duct.router/reitit
   {:routes [["/" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.app/index}]
             ["/ui"
              ["/products"
@@ -23,7 +26,9 @@
                                     :post #ig/ref :isomorphic-clojure-webapp.ui.handler.products/edit-post}]
               ["/delete/:product-id" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.products/delete
                                       :post #ig/ref :isomorphic-clojure-webapp.ui.handler.products/delete-post}]]]
-            ["/api"
+
+            ["/api" {:middleware [#ig/ref :duct.middleware.buddy/authentication]}
+             ["/health" {:get {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.app/health}}]
              ["/users"
               ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.users/list
                    :post #ig/ref :isomorphic-clojure-webapp.api.handler.users/create}]
@@ -69,6 +74,7 @@
   :isomorphic-clojure-webapp.ui.handler.products/delete-post {}
 
   :isomorphic-clojure-webapp.api.handler.app/index {}
+  :isomorphic-clojure-webapp.api.handler.app/health {}
   :isomorphic-clojure-webapp.api.handler.users/list {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.users/create {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.users/fetch {:db #ig/ref :duct.database.sql/hikaricp}

@@ -12,3 +12,11 @@
                          [:body
                           [:#app]
                           [:script {:src "/js/main.js"}]]])}))
+
+
+(defmethod ig/init-key ::health [_a _b]
+  (fn [req]
+    {:status 200
+     :headers {"content-type" "text/json"}
+     :body {:message "running!"
+            :token (:identity req)}}))
