@@ -9,6 +9,6 @@
 
 (s/def ::email (s/and string? #(re-matches email-regex %)))
 
-(s/def ::login-body (s/keys :req-un [(or ::name ::email) ::password]))
-(s/def ::signin-body (s/keys :req-un [::name ::email ::password]))
+(s/def ::signin-body (s/keys :req-un [(or ::name ::email) ::password]))
+(s/def ::signup-body (s/keys :req-un [::name ::email ::password]))
 (s/def ::put-body (s/keys :req-un [(or ::name ::email ::password)]))

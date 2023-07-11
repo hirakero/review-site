@@ -79,10 +79,10 @@
             (is (= id (:id result)))
             (is (nil? (:password result)))))
 
-        (testing "login" ;一時的に
-          (let [result (users/login boundary {:name "Bob"
-                                              :email "bob@example.com"
-                                              :password "password"})]
+        (testing "signin" ;一時的に
+          (let [result (users/signin boundary {:name "Bob"
+                                               :email "bob@example.com"
+                                               :password "password"})]
             (is (match? {:name "Bob"
                          :email "bob@example.com"} result))))))
     #_(testing "create 異常"

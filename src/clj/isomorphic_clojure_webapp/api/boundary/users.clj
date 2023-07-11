@@ -19,7 +19,7 @@
 
   (delete-user [db id])
 
-  (login [db values]))
+  (signin [db values]))
 
 (extend-protocol Users
   duct.database.sql.Boundary
@@ -68,7 +68,7 @@
           sanitized-result (dissoc result :password)]
       sanitized-result))
 
-  (login
+  (signin
     [db {:keys [name email password]}]
     (let [result (-> (hh/select :*)
                      (hh/from :users)

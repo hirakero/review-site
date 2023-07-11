@@ -39,7 +39,7 @@
         (rres/not-found nil)
         {:status 204}))))
 
-(defmethod ig/init-key ::signin [_ {:keys [db]}]
+(defmethod ig/init-key ::signup [_ {:keys [db]}]
   (fn [{:keys [body-params]}]
     (let [{:keys [name email]} body-params]
       (let [user-exists? (users/get-user-by db :name name)
@@ -58,10 +58,10 @@
             {:status 500
              :body {:error ""}}))))))
 
-(defmethod ig/init-key ::login [_ {:keys [db]}]
+(defmethod ig/init-key ::signin [_ {:keys [db]}]
   (fn [{:keys [body-params]}]
     (let [{:keys [name email password]} body-params]
-      (if-let [result (users/login db body-params)]
+      (if-let [result (users/signin db body-params)]
         (let [token (auth/create-token {:sub (:id result)
                                         :exp (-> (java.time.LocalDateTime/now)
                                                  (.plusMinutes 180)
@@ -71,5 +71,5 @@
            :body {:user result
                   :token token}})
         {:status 401
-         :body {:error "login failed"}}))))
+         :body {:error "signin failed"}}))))
 
