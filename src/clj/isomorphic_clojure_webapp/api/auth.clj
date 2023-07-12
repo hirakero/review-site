@@ -13,10 +13,10 @@
 
 (defn create-token
   "ユーザー情報のマップを受け取り、その情報をもとにjwsを返す"
-  [user]
+  [{:keys [id name]}]
   (jwt/sign
-   {:sub {:id (:id user)
-          #_#_:name (:name user)}
+   {:sub id
+    :name name
     :exp (-> (System/currentTimeMillis)
              (quot  1000)
              (+ exp-second))}

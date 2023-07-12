@@ -48,13 +48,10 @@
           {:status 409
            :body {:error "already exists"}}
           (if-let [result (users/create-user db body-params)]
-            (let [token (auth/create-token {:sub (:id result)
-                                            :exp (-> (java.time.LocalDateTime/now)
-                                                     (.plusMinutes 180)
-                                                     .toString)})]
-              {:status 201
-               :body {:user result
-                      :token token}})
+            (let [token (auth/create-token result)]
+              (rres/created (str "/api/users/" (:id result))
+                            {:user result
+                             :token token}))
             {:status 500
              :body {:error ""}}))))))
 
@@ -62,10 +59,7 @@
   (fn [{:keys [body-params]}]
     (let [{:keys [name email password]} body-params]
       (if-let [result (users/signin db body-params)]
-        (let [token (auth/create-token {:sub (:id result)
-                                        :exp (-> (java.time.LocalDateTime/now)
-                                                 (.plusMinutes 180)
-                                                 .toString)})]
+        (let [token (auth/create-token result)]
           (println "result" result)
           {:status 200
            :body {:user result
