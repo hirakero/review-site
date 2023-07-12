@@ -7,7 +7,6 @@
   (:import (java.sql
             SQLException)))
 
-
 (defprotocol Users
 
   (get-users [db])
@@ -18,9 +17,9 @@
 
   (update-user [db id values])
 
-  (delete-user [db id]))
+  (delete-user [db id])
 
-
+  (signin [db values]))
 
 (extend-protocol Users
   duct.database.sql.Boundary
@@ -53,7 +52,8 @@
       sanitized-result))
 
   (update-user [db id values]
-    (let [result (-> (hh/update :users)
+    (let [values (assoc values :updated [:now])
+          result (-> (hh/update :users)
                      (hh/set values)
                      (hh/where [:= :id [:uuid id]])
                      (sql/format)
@@ -67,4 +67,17 @@
                      (sql/format)
                      (dbh/execute-one! db))
           sanitized-result (dissoc result :password)]
-      sanitized-result)))
+      sanitized-result))
+
+  (signin
+    [db {:keys [name email password]}]
+    (let [result (-> (hh/select :*)
+                     (hh/from :users)
+                     (hh/where [:or [:= :name name]
+                                [:= :email email]])
+                     (sql/format)
+                     #_(#((def *sql %) %))
+                     (dbh/execute-one! db))]
+      (when (hashers/check password (:password result))
+        (dissoc result :password)))))
+
