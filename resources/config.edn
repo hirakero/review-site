@@ -10,8 +10,11 @@
                                           :multipart true}
                                  :responses {:absolute-redirects true}}
 
-  :duct.router/reitit
+  :duct.middleware.buddy/authentication
+  {:backend :jws
+   :secret "SECRET-KEY" #_#duct/env "SECRET-KEY"}
 
+  :duct.router/reitit
   {:routes [["/" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.app/index}]
             ["/ui"
              ["/products"
@@ -23,7 +26,11 @@
                                     :post #ig/ref :isomorphic-clojure-webapp.ui.handler.products/edit-post}]
               ["/delete/:product-id" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.products/delete
                                       :post #ig/ref :isomorphic-clojure-webapp.ui.handler.products/delete-post}]]]
-            ["/api"
+
+            ["/api" {:middleware [#ig/ref :duct.middleware.buddy/authentication]}
+             ["/health" {:get {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.app/health}}]
+             ["/health-auth" {:get {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.app/health
+                                    :middleware [#ig/ref :isomorphic-clojure-webapp.api.auth/wrap-user-only]}}]
              ["/users"
               ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.users/list
                    :post #ig/ref :isomorphic-clojure-webapp.api.handler.users/create}]
@@ -31,12 +38,12 @@
                ["" {:get  #ig/ref :isomorphic-clojure-webapp.api.handler.users/fetch
                     :put {:parameters {:body :isomorphic-clojure-webapp.spec.users/put-body}
                           :handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/update}
-                    :delete #ig/ref :isomorphic-clojure-webapp.api.handler.users/delete}]
+                    :delete {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/delete}}]
                ["/reviews" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/list}]]]
-             ["/login" {:post {:parameters {:body :isomorphic-clojure-webapp.spec.users/login-body}
-                               :handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/login}}]
              ["/signin" {:post {:parameters {:body :isomorphic-clojure-webapp.spec.users/signin-body}
                                 :handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/signin}}]
+             ["/signup" {:post {:parameters {:body :isomorphic-clojure-webapp.spec.users/signup-body}
+                                :handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/signup}}]
 
              ["/products"
               ["" {:get  {:parameters {:query :isomorphic-clojure-webapp.spec.products/query}
@@ -68,14 +75,17 @@
   :isomorphic-clojure-webapp.ui.handler.products/delete {}
   :isomorphic-clojure-webapp.ui.handler.products/delete-post {}
 
+
   :isomorphic-clojure-webapp.api.handler.app/index {}
+  :isomorphic-clojure-webapp.api.handler.app/health {}
+  :isomorphic-clojure-webapp.api.auth/wrap-user-only {}
   :isomorphic-clojure-webapp.api.handler.users/list {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.users/create {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.users/fetch {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.users/update {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.users/delete {:db #ig/ref :duct.database.sql/hikaricp}
-  :isomorphic-clojure-webapp.api.handler.users/login {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.users/signin {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.api.handler.users/signup {:db #ig/ref :duct.database.sql/hikaricp}
 
   :isomorphic-clojure-webapp.api.handler.products/list {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.products/create {:db #ig/ref :duct.database.sql/hikaricp}

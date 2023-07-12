@@ -8,7 +8,10 @@
             [duct.database.sql]
             [isomorphic-clojure-webapp.ui.boundary.http-helper :as helper]
             [isomorphic-clojure-webapp.api.boundary.users :as users]
-            [next.jdbc :as jdbc]))
+            [next.jdbc :as jdbc]
+            [matcher-combinators.clj-test]
+            [reitit.core :as r]
+            [buddy.sign.jwt :as jwt]))
 
 #_(def ^:private alice-data {:id 1, :name "Alice", :email "alice@xample.com"})
 #_(def ^:private bob-data {:id 2, :name "Bob", :email "bob@example.com"})
@@ -143,7 +146,7 @@
           (is (= "Alice" (-> body :user :name)))))
 
       (testing "対象データが無ければ not foundで何も返さない"
-        (let [{:keys [status body] :as all} (helper/http-get (str "/api/users/00000000-0000-0000-0000-000000000000"))]
+        (let [{:keys [status body]} (helper/http-get (str "/api/users/00000000-0000-0000-0000-000000000000"))]
           (is (= 404 status))
           (is (nil? body)))))
 
@@ -177,13 +180,64 @@
           (is (= 404 status))
           (is (nil? body)))))))
 
-(deftest handler-login-test
-  (let [{:keys [status body]} (helper/http-post "/api/signin" {:name "alice"
-                                                               :email "alice@example.com"
-                                                               :password "password"})]
-    (testing "正常にサインインできたら を返す"
-      (is (= 201 status))))
-  (testing "すでに登録済みの場合はエラーメッセージをを返す"
-    #_(is (= 400)))
-  (testing "内容が不正な場合はエラーメッセージをを返す"
-    #_(is (= 400))))
+(def jwt-regex #"^[A-Za-z0-9-_]+?.[A-Za-z0-9-_]+?.[A-Za-z0-9-_]+$")
+(deftest handler-auth-test
+  (testing "サインイン"
+    (testing "正常、ユーザー情報とトークンを返す。パスワードは返さない"
+      (let [{:keys [status body]} (helper/http-post "/api/signup" {:name "alice"
+                                                                   :email "alice@example.com"
+                                                                   :password "password"})]
+        (is (= 201 status))
+        (is (match? {:name "alice"
+                     :email "alice@example.com"}
+                    (:user body)))
+        (is (not (contains? (:user body) :password)))
+        (is (boolean (re-find jwt-regex (:token body ""))))))
+    (testing "内容が不正なら400"
+      (let [{:keys [status body]} (helper/http-post "/api/signup" {:namae "alice"
+                                                                   :e-mail "alice@example.com"
+                                                                   :password 5})]
+        (is (= 400 status))
+        (is (contains? body :spec))))
+    (testing "既に登録されていたら409?"
+      (let [{:keys [status body]} (helper/http-post "/api/signup" {:name "alice"
+                                                                   :email "alice@example.com"
+                                                                   :password "password"})]
+        (is (= 409 status)))))
+
+  (testing "ログイン"
+    (testing "正常、ユーザー情報とトークンを返す。パスワードは返さない"
+      (let [{:keys [status body]} (helper/http-post "/api/signin" {:name "alice"
+                                                                   :email "alice@example.com"
+                                                                   :password "password"})
+            user (:user body)]
+
+        (is (= 200 status))
+        (is (match? {:name "alice"
+                     :email "alice@example.com"}
+                    user))
+        (is (not (contains? user :password)))
+
+        (let [claim  (jwt/unsign (:token body) "SECRET-KEY")] ;TODO
+          (is (= (:id user) (:sub claim)))
+          (is (= (:name user) (:name claim)))))
+
+      (let [{:keys [status body]} (helper/http-post "/api/signin" {:name "alice"
+                                                                   :password "password"})]
+
+        (is (= 200 status)))
+      (let [{:keys [status body]} (helper/http-post "/api/signin" {:email "alice@example.com"
+                                                                   :password "password"})]
+
+        (is (= 200 status))))
+    (testing "内容が不正なら400"
+      (let [{:keys [status body]} (helper/http-post "/api/signin" {:me-ru "alice@example.com"
+                                                                   :pw "password"})]
+
+        (is (= 400 status)))))
+  (testing "未登録のユーザーはエラーメッセージを返す"
+    (let [{:keys [status body]} (helper/http-post "/api/signin" {:name "dave"
+                                                                 :password "password"})]
+
+      (is (= 401 status)))))
+ 

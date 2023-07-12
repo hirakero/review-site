@@ -66,7 +66,8 @@
       result))
 
   (update-product [db id values]
-    (let [result (-> (hh/update :products)
+    (let [values (assoc values :updated [:now])
+          result (-> (hh/update :products)
                      (hh/set values)
                      (hh/where [:= :id [:uuid id]])
                      (sql/format)
