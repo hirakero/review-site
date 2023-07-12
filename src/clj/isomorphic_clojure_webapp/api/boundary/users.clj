@@ -52,7 +52,8 @@
       sanitized-result))
 
   (update-user [db id values]
-    (let [result (-> (hh/update :users)
+    (let [values (assoc values :updated [:now])
+          result (-> (hh/update :users)
                      (hh/set values)
                      (hh/where [:= :id [:uuid id]])
                      (sql/format)
