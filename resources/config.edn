@@ -55,16 +55,16 @@
                     :put {:parameters {:body :isomorphic-clojure-webapp.spec.products/put-body}
                           :handler #ig/ref :isomorphic-clojure-webapp.api.handler.products/update}
                     :delete {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.products/delete}}]
-               ["/reviews" {#_:post
+               ["/reviews" {:post #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/create
                             :get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/list}]]]
 
              ["/reviews"
-              ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/list
-                   :post #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/create}]
-              ["/:review-id"
+              ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/list}]
+              ["/:review-id" {:parameters {:path :isomorphic-clojure-webapp.spec.reviews/reviews-path}}
                ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/fetch
-                    :put #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/update
-                    :delete #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/delete}]]]]]}
+                    #_#_:put #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/update
+                    :delete {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/delete
+                             :middleware [#ig/ref :isomorphic-clojure-webapp.api.auth/wrap-user-only]}}]]]]]}
 
   :isomorphic-clojure-webapp.ui.handler.products/list {}
   :isomorphic-clojure-webapp.ui.handler.products/detail {}
