@@ -60,7 +60,6 @@
     (let [{:keys [name email password]} body-params]
       (if-let [result (users/signin db body-params)]
         (let [token (auth/create-token result)]
-          (println "result" result)
           {:status 200
            :body {:user result
                   :token token}})

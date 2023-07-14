@@ -33,11 +33,7 @@
         (rres/not-found {:error "not-found"})
         (if (= (-> target :user-id str) user-id)
           (if-let [result (reviews/delete-review db review-id)]
-            (do
-              (println "\nresult " result)
-              {:status 204})
-            (do
-              (println "\nnot-found ")
-              (rres/not-found {:error "not-found"})))
+            {:status 204}
+            (rres/not-found {:error "not-found"}))
           {:status 403
            :body {}})))))

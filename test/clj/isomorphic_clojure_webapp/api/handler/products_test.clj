@@ -3,8 +3,7 @@
             [isomorphic-clojure-webapp.ui.boundary.http-helper :as helper]
             [integrant.core :as ig]
             [integrant.repl.state :refer [system config]]
-            [next.jdbc :as jdbc]
-            [isomorphic-clojure-webapp.api.handler.products :as sut]))
+            [next.jdbc :as jdbc]))
 
 (comment
   (let [boundary (:duct.database.sql/hikaricp system)

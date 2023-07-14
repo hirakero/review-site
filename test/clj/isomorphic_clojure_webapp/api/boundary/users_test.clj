@@ -4,12 +4,7 @@
             [integrant.repl.state :refer [config system]]
             [duct.database.sql]
             [matcher-combinators.test]
-            [matcher-combinators.clj-test :as m]
-            [next.jdbc :as jdbc]
-            [honey.sql :as sql]
-            [honey.sql.helpers :as hh]
-            [isomorphic-clojure-webapp.api.boundary.db-helper :as dbh]
-            [buddy.hashers :as hashers]))
+            [next.jdbc :as jdbc]))
 
 (use-fixtures :each
   (fn [f]

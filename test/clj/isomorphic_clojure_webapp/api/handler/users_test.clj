@@ -10,7 +10,6 @@
             [isomorphic-clojure-webapp.api.boundary.users :as users]
             [next.jdbc :as jdbc]
             [matcher-combinators.clj-test]
-            [reitit.core :as r]
             [buddy.sign.jwt :as jwt]))
 
 #_(def ^:private alice-data {:id 1, :name "Alice", :email "alice@xample.com"})

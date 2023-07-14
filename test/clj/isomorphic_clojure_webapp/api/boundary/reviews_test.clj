@@ -4,7 +4,6 @@
             [integrant.repl.state :refer [config system]]
             [duct.database.sql]
             [matcher-combinators.test]
-            #_[matcher-combinators.clj-test :as m]
             [next.jdbc :as jdbc]))
 
 (use-fixtures :each
