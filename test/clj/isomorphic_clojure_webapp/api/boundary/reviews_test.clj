@@ -23,7 +23,6 @@
                                               :rate 3})
           id (:id result)]
       (testing "新規作成"
-        (println result)
         (is (= (java.util.UUID/fromString "00000000-0000-0000-0000-000000000001") (:user-id result)))
         (is (= (java.util.UUID/fromString "00000000-0000-0000-0000-000000000002") (:product-id result)))
         (is (= "not bad" (:title result)))
@@ -65,6 +64,8 @@
           (is (= 4 (count result))))
 
         (testing "削除"
+          (let [result (sut/delete-review boundary "00000000-0000-0000-0000-000000000111")]
+            (is (nil? result)))
           (let [result (sut/delete-review boundary id)]
             (is (= id (:id result))))
           (let [result (sut/get-reviews boundary {})]

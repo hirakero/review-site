@@ -29,10 +29,11 @@
       keyword))
 
 (defn keys->kebab [m]
-  (reduce-kv (fn [m k v]
-               (assoc m (snake->kebab k) v))
-             {}
-             m))
+  (when (map? m)
+    (reduce-kv (fn [m k v]
+                 (assoc m (snake->kebab k) v))
+               {}
+               m)))
 
 (extend-protocol Reviews
   duct.database.sql.Boundary
@@ -101,7 +102,8 @@
       (keys->kebab result)))
 
   (update-review [db id values]
-    (let [result (-> (hh/update :reviews)
+    (let [values (assoc values :updated [:now])
+          result (-> (hh/update :reviews)
                      (hh/set values)
                      (hh/where [:= :id [:uuid id]])
                      (sql/format)

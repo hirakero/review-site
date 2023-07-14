@@ -22,6 +22,9 @@
              (+ exp-second))}
    secret-key))
 
+(defn parse-token [token]
+  (jwt/unsign token secret-key))
+
 (defmethod ig/init-key ::wrap-user-only [key _]
   (fn [handler]
     (fn [req]
