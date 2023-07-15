@@ -16,10 +16,16 @@
 (defn read-config []
   (duct/read-config (io/resource "config.edn")))
 
-(defn test []
-  (eftest/run-tests (eftest/find-tests "test")
-                    {:capture-output? false
-                     :multithread? false}))
+(defn test
+  ([]
+   (eftest/run-tests (eftest/find-tests "test")
+                     {:capture-output? false
+                      :multithread? false}))
+  ([tests]
+   {:pre [(seqable? tests)]}
+   (eftest/run-tests tests
+                     {:capture-output? false
+                      :multithread? false})))
 
 (def profiles
   [:duct.profile/dev :duct.profile/local])
