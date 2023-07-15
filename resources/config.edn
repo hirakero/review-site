@@ -55,7 +55,9 @@
                     :put {:parameters {:body :isomorphic-clojure-webapp.spec.products/put-body}
                           :handler #ig/ref :isomorphic-clojure-webapp.api.handler.products/update}
                     :delete {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.products/delete}}]
-               ["/reviews" {:post #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/create
+               ["/reviews" {:post {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/create
+                                   :middleware [#ig/ref :isomorphic-clojure-webapp.api.auth/wrap-user-only]
+                                   :parameters {:body :isomorphic-clojure-webapp.spec.reviews/post-body}}
                             :get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/list}]]]
 
              ["/reviews"
