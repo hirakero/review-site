@@ -7,7 +7,10 @@
   (get-reviews [db query])
 
   (get-review-by-id [db id])
-  #_(get-review-by-product-user [db product-id user-id]) ;?
+
+  (get-reviews-by-product [db product-id])
+
+  (get-reviews-by-user [db user-id])
 
   (create-review [db values])
 
@@ -34,6 +37,14 @@
                  (assoc m (snake->kebab k) v))
                {}
                m)))
+
+(defn- get-reviews-by [[column id]]
+  (->
+   (hh/select :r.* [:u.name :user-name] [:p.name :product-name])
+   (hh/from [:reviews :r])
+   (hh/inner-join [:products :p] [:= :r.product-id :p.id])
+   (hh/inner-join [:users :u]  [:= :r.user-id :u.id])
+   (hh/where := column [:uuid id])))
 
 (extend-protocol Reviews
   duct.database.sql.Boundary
@@ -93,6 +104,30 @@
                      (dbh/execute-one! db))]
       (keys->kebab result)))
 
+  (get-reviews-by-product [db product-id]
+    (let [results (-> (hh/select :r.* [:u.name :user-name] [:p.name :product-name])
+                      (hh/from [:reviews :r])
+                      (hh/inner-join [:products :p] [:= :r.product-id :p.id])
+                      (hh/inner-join [:users :u]  [:= :r.user-id :u.id])
+                      (hh/where := :product-id [:uuid product-id])
+                      (sql/format)
+                      #_((fn [s] (println "\nsql " s) (def *sql s) s))
+                      (dbh/execute! db)
+                      #_((fn [s] (println "\nresult " s) (def *results s) s)))]
+      #_(keys->kebab result)
+      results))
+
+  (get-reviews-by-user [db user-id]
+    (let [results (-> (hh/select :r.* [:u.name :user-name] [:p.name :product-name])
+                      (hh/from [:reviews :r])
+                      (hh/inner-join [:products :p] [:= :r.product-id :p.id])
+                      (hh/inner-join [:users :u]  [:= :r.user-id :u.id])
+                      (hh/where := :user-id [:uuid user-id])
+                      (sql/format)
+                      #_((fn [s] (println "\nsql " s) (def *sql s) s))
+                      (dbh/execute! db))]
+      #_(keys->kebab result)
+      results))
 
   (create-review [db {:keys [user-id product-id title content rate]}]
     (let [result (-> (hh/insert-into :reviews [:user-id :product-id :title :content :rate :created :updated])
