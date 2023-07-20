@@ -34,7 +34,7 @@
              ["/users"
               ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.users/list
                    :post #ig/ref :isomorphic-clojure-webapp.api.handler.users/create}]
-              ["/:user-id"
+              ["/:user-id" {:parameters {:path :isomorphic-clojure-webapp.spec.users/user-path}}
                ["" {:get  #ig/ref :isomorphic-clojure-webapp.api.handler.users/fetch
                     :put {:parameters {:body :isomorphic-clojure-webapp.spec.users/put-body}
                           :handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/update}
@@ -76,7 +76,6 @@
   :isomorphic-clojure-webapp.ui.handler.products/edit-post {}
   :isomorphic-clojure-webapp.ui.handler.products/delete {}
   :isomorphic-clojure-webapp.ui.handler.products/delete-post {}
-
 
   :isomorphic-clojure-webapp.api.handler.app/index {}
   :isomorphic-clojure-webapp.api.handler.app/health {}
