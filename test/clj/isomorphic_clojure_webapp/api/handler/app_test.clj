@@ -5,12 +5,15 @@
 
 (deftest handler-app-test
   (testing "tokenのテスト"
-    (let [{:keys [status body]} (helper/http-post "/api/signin" {:name "Bob"
+    (let [_ (helper/http-post "/api/signup" {:name "Bob"
+                                             :email "bob@example.com"
+                                             :password "password"})
+          {:keys [status body]} (helper/http-post "/api/signin" {:name "Bob"
                                                                  :email "bob@example.com"
                                                                  :password "password"})
           token (:token body)]
 
-      (testing "get /api/hepth はtokenありで成功"
+      (testing "get /api/health はtokenありでも成功"
         (let [{:keys [status body]} (helper/http-get "/api/health"
                                                      {"authorization" (str "Token " token)})]
           (is (= 200 status))
