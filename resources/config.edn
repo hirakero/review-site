@@ -39,7 +39,7 @@
                     :put {:parameters {:body :isomorphic-clojure-webapp.spec.users/put-body}
                           :handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/update}
                     :delete {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/delete}}]
-               ["/reviews" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/list}]]]
+               ["/reviews" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/list-by-user}]]]
              ["/signin" {:post {:parameters {:body :isomorphic-clojure-webapp.spec.users/signin-body}
                                 :handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/signin}}]
              ["/signup" {:post {:parameters {:body :isomorphic-clojure-webapp.spec.users/signup-body}
@@ -58,7 +58,7 @@
                ["/reviews" {:post {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/create
                                    :middleware [#ig/ref :isomorphic-clojure-webapp.api.auth/wrap-user-only]
                                    :parameters {:body :isomorphic-clojure-webapp.spec.reviews/post-body}}
-                            :get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/list}]]]
+                            :get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/list-by-product}]]]
 
              ["/reviews"
               ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/list}]
@@ -96,9 +96,11 @@
   :isomorphic-clojure-webapp.api.handler.products/delete {:db #ig/ref :duct.database.sql/hikaricp}
 
   :isomorphic-clojure-webapp.api.handler.reviews/list {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.api.handler.reviews/list-by-product {:db #ig/ref :duct.database.sql/hikaricp}
+  :isomorphic-clojure-webapp.api.handler.reviews/list-by-user {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.reviews/create {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.reviews/fetch {:db #ig/ref :duct.database.sql/hikaricp}
-  :isomorphic-clojure-webapp.api.handler.reviews/update {:db #ig/ref :duct.database.sql/hikaricp}
+  #_#_:isomorphic-clojure-webapp.api.handler.reviews/update {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.reviews/delete {:db #ig/ref :duct.database.sql/hikaricp}
 
   :duct.migrator/ragtime {:migrations [#ig/ref :review-site.migration/create-users-table
@@ -142,4 +144,6 @@
  :duct.module.web/api
  {}
  :duct.module/sql
- {}}
+ {}
+ #_#_:duct.server.http/jetty
+   {:port 3018}}

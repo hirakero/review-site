@@ -7,7 +7,33 @@
 
 (defmethod ig/init-key ::list [_ {:keys [db]}]
   (fn [req]
-    {:body {:reviews {}}}))
+    {:body {:reviews []}}))
+
+
+(defmethod ig/init-key ::list-by-product [_ {:keys [db]}]
+  (fn [{:keys [path-params]}]
+    (let [product-id (:product-id path-params)
+          product (products/get-product-by db :id product-id)]
+      (if-not product
+        (rres/not-found {:error "product not found"})
+        (let [reviews (reviews/get-reviews-by-product db product-id)]
+          (if (empty? reviews)
+            (rres/not-found {:error "review not found"})
+            (rres/response {:reviews reviews})))))))
+
+
+(defmethod ig/init-key ::list-by-user [_ {:keys [db]}]
+  (fn [{:keys [path-params]}]
+    (let [user-id (:user-id path-params)
+          user (users/get-user-by db :id user-id)]
+      (if-not user
+        (rres/not-found {:error "user not found"})
+        (let [reviews (reviews/get-reviews-by-user db user-id)]
+          (if (empty? reviews)
+            (rres/not-found {:error "review not found"})
+            (rres/response {:reviews reviews})))))))
+
+
 (defmethod ig/init-key ::fetch [_ {:keys [db]}]
   (fn [req]
     {:body {:review {}}}))
@@ -36,7 +62,7 @@
           target (reviews/get-review-by-id db review-id)
           user-id (:sub identity)]
       ;TODO 対象データがなくても成功にする？
-      (if (nil? target)
+      (if-not target
         (rres/not-found {:error "review not found"})
         (if (= (-> target :user-id str) user-id)
           (if-let [result (reviews/delete-review db review-id)]
