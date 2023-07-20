@@ -49,10 +49,11 @@
 
 (deftest handler-reviews-test
   (let [;正規ユーザー追加
-        {{user1-id :id} :body} (helper/http-post "/api/signup"
-                                                 {:name "Chris"
-                                                  :email "chris@email.com"
-                                                  :password "password"})
+        resultu1 (helper/http-post "/api/signup"
+                                   {:name "Chris"
+                                    :email "chris@email.com"
+                                    :password "password"})
+        {{{user1-id :id} :user} :body} resultu1
         ;サインイン、トークン保持
         {{user1-token :token} :body} (helper/http-post "/api/signin"
                                                        {:name "Chris"
@@ -73,11 +74,11 @@
 
         user2-token-header {"authorization" (str "Token " user2-token)}
 
-        {{user3-id :id} :body} (helper/http-post "/api/signin"
-                                                 {:name "Eric"
-                                                  :email "eric@email.com"
-                                                  :password "password"})
-
+        resultu3 (helper/http-post "/api/signup"
+                                   {:name "Eric"
+                                    :email "eric@email.com"
+                                    :password "password"})
+        {{{user3-id :id} :user} :body} resultu3
         ;商品追加
         {{product1-id :id} :body} (helper/http-post "/api/products"
                                                     {:name "sr400"
@@ -96,7 +97,7 @@
                                  {:title "not bad"
                                   :content "Today, I wanna show you ...."
                                   :rate 4})
-        p1u1-review-id (-> result :body :id)]
+        review-p1u1-id (-> result :body :id)]
 
     (testing "post /products/:product-id/reviews"
       (testing "正常。201 とlocationと、登録した内容を直接返す"
@@ -169,7 +170,7 @@
           (is (coll? (:reviews body)))
           (is (= 2 (count (:reviews body))))
 
-          (testing "投稿ユーザー名も返す"
+          (testing "投稿ユーザーも返す"
             (let [review (-> body :reviews first)]
               (is (string? (:user-name review)))))))
 
@@ -181,34 +182,62 @@
         (let [{:keys [status body]} (helper/http-get (str "/api/products/" "00000000-0000-0000-0000-000000000000" "/reviews"))]
           (is (= 404 status)))))
 
-    #_(testing " get /users/:user-id/reviews"
-        (testing "tokenなしでOK。そのユーザーのレビューを配列で返す"
-          (let [{:keys [status body] :as result} (helper/http-get (str "/api/users/" user1-id "/reviews"))]
-            (is (= 200 status))
-            #_(is (coll? (:reviews body)))
-            #_(is (= 2 (count (:reviews body))))
+    (comment
+      (helper/http-get (str "/api/users/" "00000000-0000-0000-0000-000000000000" "/reviews"))
+      (helper/http-get (str "/api/users/" "e7a437d2-aba2-42c0-81fb-a982a55a8dc2" "/reviews")))
 
-            #_(testing "商品名も返す"
-                (let [review (-> body :reviews first)]
-                  (is (string? (:product-name review)))))))
+    (testing " get /users/:user-id/reviews"
+      (testing "tokenなしでOK。そのユーザーのレビューを配列で返す"
+        (let [{:keys [status body] :as result} (helper/http-get (str "/api/users/" user1-id "/reviews"))]
+          (is (= 200 status))
+          (is (coll? (:reviews body)))
+          (is (= 2 (count (:reviews body))))
 
-        #_(testing "レビューがなければ404"
-            (let [{:keys [status body]} (helper/http-get (str "/api/users/" user3-id "/reviews"))]
-              (is (= 404 status))))
+          (testing "商品名も返す"
+            (let [review (-> body :reviews first)]
+              (is (string? (:product-name review)))))))
 
-        #_(testing "ユーザーがなければ 404"
-            (let [{:keys [status body]} (helper/http-get (str "/api/users/" "00000000-0000-0000-0000-000000000000" "/reviews"))]
-              (is (= 404 status)))))
+      (testing "レビューがなければ404"
+        (let [{:keys [status body]} (helper/http-get (str "/api/users/" user3-id "/reviews"))]
+          (is (= 404 status))))
 
-    (testing " get /reviews query")
+      (testing "ユーザーがなければ 404"
+        (let [{:keys [status body] :as result} (helper/http-get (str "/api/users/" "00000000-0000-0000-0000-000000000000" "/reviews"))]
+          (is (= 404 status)))))
+
+
+
+    (comment
+
+      (helper/http-get (str "/api/reviews/" "62db023a-bb20-4ad0-9bf0-36c54cec1e10")))
 
     (testing "get /reviews/:review-id"
-      (testing "取得した内容を返す :review {,,,}")
-      (testing "対象データが無ければ 404 で, :review nilを返す")
-      (testing ":id がUUIDでなければ 400 とメッセージ"))
+      (testing "取得した内容を返す :review {,,,}"
+        (let [{:keys [status body] :as result} (helper/http-get (str "/api/reviews/" review-p1u1-id))
+              review (:review body)]
+          (is (= 200 status))
+          (is (= "not bad" (:title review)))
+          (is (= 4  (:rate review)))
+
+          #_(testing "商品名も返す"
+              (let [review (-> body :reviews first)]
+                (is (string? (:product-name review)))))))
+
+      (testing "対象データが無ければ 404 で, を返す"
+        (let [{:keys [status body] :as result} (helper/http-get (str "/api/reviews/" "00000000-0000-0000-0000-000000000000"))]
+          (is (= 404 status))
+          (is (= "review not found" (:error body)))))
+
+      (testing ":id がUUIDでなければ 400 とメッセージ"
+        (let [{:keys [status body] :as result} (helper/http-get (str "/api/reviews/" "12345"))]
+          (is (= 400 status)))))
 
     (testing "get /reviews"
-      (testing "データの配列を返す")
+      (testing "データの配列を返す"
+        (let [{:keys [status body] :as result} (helper/http-get "/api/reviews")]
+          (is (= 200 status))
+          (is (= 3 (-> body :reviews count)))))
+
       (testing "クエリパラメータで絞り込み"
         (testing "対象データが無ければ404で、:products nilを返す"))
       (testing "クエリパラメータでページネーション"
@@ -216,17 +245,18 @@
       (testing "クエリパラメータでソート"
         (testing "")
         (testing "orderのasc,desc以外は400")))
+
     (testing " update は無し"
          ;405
       )
 
     (testing "delete"
       (testing "認証なしは401"
-        (let [{:keys [status body]} (helper/http-delete (str "/api/reviews/" p1u1-review-id))]
+        (let [{:keys [status body]} (helper/http-delete (str "/api/reviews/" review-p1u1-id))]
           (is (= 401 status))))
 
       (testing "本人以外は消せない 403"
-        (let [{:keys [status body]} (helper/http-delete (str "/api/reviews/" p1u1-review-id)
+        (let [{:keys [status body]} (helper/http-delete (str "/api/reviews/" review-p1u1-id)
                                                         user2-token-header)]
           (is (= 403 status))))
 
@@ -260,9 +290,8 @@
           (is (= 400 status))))
 
       (testing "削除に成功したらno contentで何も返さない"
-        (let [{:keys [status body]} (helper/http-delete (str "/api/reviews/" p1u1-review-id)
+        (let [{:keys [status body]} (helper/http-delete (str "/api/reviews/" review-p1u1-id)
                                                         user1-token-header)]
           (is (= 204 status))
-          (is (nil? body)))))
-    result))
+          (is (nil? body)))))))
 
