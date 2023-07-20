@@ -3,40 +3,42 @@
             [isomorphic-clojure-webapp.api.boundary.products :as products]
             [ring.util.response :as rres]))
 
-(defmethod ig/init-key ::all [_ {:keys [db]}]
+(defmethod ig/init-key ::list [_ {:keys [db]}]
   (fn [{:keys [query-params]}]
     (let [kw-key-params (zipmap (->> query-params keys (map keyword)) (vals query-params))  ;TODO もっとシンプルに
           kw-val-key  (filter #(contains? kw-key-params %) [:sort :order])         ;←このキーの値はkeywordにする
           kw-val-params (reduce #(update %1 %2 keyword) kw-key-params kw-val-key)
           result (products/get-products db kw-val-params)]
       (if (empty? result)
-        (rres/not-found nil)
+        (rres/not-found {:products nil
+                         :error "resource-not-found"})
         (rres/response {:products result})))))
 
 (defmethod ig/init-key ::fetch [_ {:keys [db]}]
   (fn [{:keys [path-params]}]
     (let [result (products/get-product-by db :id (:product-id path-params))]
       (if (empty? result)
-        (rres/not-found nil)
+        (rres/not-found {:product nil
+                         :error "resource-not-found"})
         (rres/response {:product result})))))
 
 (defmethod ig/init-key ::create [_ {:keys [db]}]
   (fn [{:keys [body-params]}]
     (let [result (products/create-product db body-params)]
       (if (empty? result)
-        (rres/bad-request {:product nil})
+        (rres/bad-request {:error ""})
         (rres/created (str "/api/products/" (:id result))  result)))))
 
 (defmethod ig/init-key ::update [_ {:keys [db]}]
   (fn [{:keys [path-params body-params]}]
     (let [result (products/update-product db (:product-id path-params) body-params)]
       (if (empty? result)
-        (rres/not-found nil)
+        (rres/not-found {:error "resource-not-found"})
         (rres/response  result)))))
 
 (defmethod ig/init-key ::delete [_ {:keys [db]}]
   (fn [{:keys [path-params]}]
     (let [result (products/delete-product db (:product-id path-params))]
       (if (empty? result)
-        (rres/not-found nil)
+        (rres/not-found {:error "resource-not-found"})
         {:status 204}))))

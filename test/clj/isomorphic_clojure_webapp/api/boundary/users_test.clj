@@ -4,7 +4,6 @@
             [integrant.repl.state :refer [config system]]
             [duct.database.sql]
             [matcher-combinators.test]
-            [matcher-combinators.clj-test :as m]
             [next.jdbc :as jdbc]))
 
 (use-fixtures :each
@@ -18,18 +17,16 @@
   (#(let [boundary (:duct.database.sql/hikaricp system)
           ds (-> boundary :spec :datasource)]
 
-      (let [result (jdbc/execute! ds [%])]
+      (let [result (jdbc/execute! ds %)]
         result))
-   #_"select * from users"
-   #_"select * from products"
-   #_"select uuid('00000000-0000-0000-0000-000000000000')"
-   "select * from products where id = '04875e11-0591-4a1b-ab4f-287c3367cf29'"
-   #_"insert into users (name) values ('Bob')"
-   #_"delete from users"))
+   ["SELECT * FROM users WHERE (name = ?) OR (email = ?)" "Bob" "bob@examile.com"]
+   #_["select * from users"]
+   #_["select * from products"]
+   #_["insert into users (name) values ('Bob')"]))
 
 (deftest users-boundary-test
   (let [boundary (:duct.database.sql/hikaricp system)]
-    (testing "all"
+    (testing "list"
       (let [result (users/get-users boundary)]
         (is (= [] result))))
     (testing "create"
@@ -65,9 +62,9 @@
                                                        :email "alice@example.com"})]
             (is (match? {:name "Alice"
                          :email "alice@example.com"} result))))
-        (testing "all"
+        (testing "list"
           (users/create-user boundary {:name "Bob"
-                                       :email "bob@examile.com"
+                                       :email "bob@example.com"
                                        :password "password"})
           (let [result (users/get-users boundary)]
             (is (= 2 (count result)))
@@ -75,7 +72,14 @@
         (testing "delete"
           (let [result (users/delete-user boundary id)]
             (is (= id (:id result)))
-            (is (nil? (:password result)))))))
+            (is (nil? (:password result)))))
+
+        (testing "signin" ;一時的に
+          (let [result (users/signin boundary {:name "Bob"
+                                               :email "bob@example.com"
+                                               :password "password"})]
+            (is (match? {:name "Bob"
+                         :email "bob@example.com"} result))))))
     #_(testing "create 異常"
         (let [result (users/create-user boundary {:namae "Aida"})]
           #_(is ((-> result)))

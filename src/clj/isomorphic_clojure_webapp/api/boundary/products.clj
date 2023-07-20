@@ -2,9 +2,7 @@
   (:require [duct.database.sql]
             [honey.sql :as sql]
             [honey.sql.helpers :as hh]
-            [isomorphic-clojure-webapp.api.boundary.db-helper :as dbh])
-  (:import (java.sql
-            SQLException)))
+            [isomorphic-clojure-webapp.api.boundary.db-helper :as dbh]))
 
 (defprotocol Products
 
@@ -21,6 +19,7 @@
 (defn- p-long [x]
   (if (string? x) (Long/parseLong x) x))
 
+(def max-limit 100)
 (extend-protocol Products
   duct.database.sql.Boundary
 
@@ -29,11 +28,18 @@
                   name [:like :name (str "%" name "%")]
                   description [:like :description (str "%" description "%")]
                   :else [])
+          lmt (if limit
+                (let [l (p-long limit)]
+                  (if (< max-limit l)
+                    max-limit
+                    l))
+                max-limit)
+          ofs (if offset (p-long offset) 0)
           result (-> (hh/select :*)
                      (hh/from :products)
                      (hh/where where)
-                     (hh/offset (if offset (p-long offset) []))
-                     (hh/limit (if limit (p-long limit) []))
+                     (hh/offset ofs)
+                     (hh/limit lmt)
                      (#(if-not (nil? sort)
                          (hh/order-by % [sort order])
                          %))
@@ -58,7 +64,8 @@
       result))
 
   (update-product [db id values]
-    (let [result (-> (hh/update :products)
+    (let [values (assoc values :updated [:now])
+          result (-> (hh/update :products)
                      (hh/set values)
                      (hh/where [:= :id [:uuid id]])
                      (sql/format)
