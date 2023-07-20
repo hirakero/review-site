@@ -15,7 +15,7 @@
   (fn [{:keys [body-params]}]
     (let [result (users/create-user db body-params)]
       (if (empty? result)
-        (rres/bad-request {:user nil})
+        (rres/bad-request nil)
         (rres/created (str "/api/users/" (:id result)) result)))))
 
 (defmethod ig/init-key ::fetch [_ {:keys [db]}]
