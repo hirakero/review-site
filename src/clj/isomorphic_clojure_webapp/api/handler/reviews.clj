@@ -6,9 +6,11 @@
             [ring.util.response :as rres]))
 
 (defmethod ig/init-key ::list [_ {:keys [db]}]
-  (fn [req]
-    {:body {:reviews []}}))
-
+  (fn [_]
+    (let [reviews (reviews/get-reviews db {})]
+      (if (empty? reviews)
+        (rres/not-found {:error "reviews not found"})
+        (rres/response {:reviews reviews})))))
 
 (defmethod ig/init-key ::list-by-product [_ {:keys [db]}]
   (fn [{:keys [path-params]}]
@@ -35,8 +37,12 @@
 
 
 (defmethod ig/init-key ::fetch [_ {:keys [db]}]
-  (fn [req]
-    {:body {:review {}}}))
+  (fn [{:keys [path-params]}]
+    (let [review-id (:review-id path-params)
+          review (reviews/get-review-by-id db review-id)]
+      (if (empty? review)
+        (rres/not-found {:error "review not found"})
+        (rres/response {:review review})))))
 
 (defmethod ig/init-key ::create [_ {:keys [db]}]
   (fn [{:keys [body-params path-params identity]}]
