@@ -14,36 +14,37 @@
     (f)))
 
 (deftest ui-boundary-product-test
-  (let [{:keys [status body]} (sut/create-product {:name "panda" :description "white and black"})
+  (let [boundary (:isomorphic-clojure-webapp.ui.boundary.web/host system)
+        {:keys [status body]} (sut/create-product boundary {:name "panda" :description "white and black"})
         id (:id body)]
     (testing "create"
       (is (= "panda" (:name body)))
       (is (= "white and black" (:description body))))
 
     (testing "fetch"
-      (let [{:keys [status body]} (sut/get-product-by-id id)
+      (let [{:keys [status body]} (sut/get-product-by-id boundary id)
             product (:product body)]
         (is (= "panda" (:name product)))
         (is (= "white and black" (:description product)))))
 
     (testing "update"
-      (let [{:keys [status body]} (sut/update-product id {:description "eat bamboo"})]
+      (let [{:keys [status body]} (sut/update-product boundary id {:description "eat bamboo"})]
         (is (= "panda" (:name body)))
         (is (= "eat bamboo" (:description body)))))
 
-    (sut/create-product {:name "lesser panda" :description "red"})
-    (sut/create-product {:name "fox" :description "yellow"})
+    (sut/create-product boundary {:name "lesser panda" :description "red"})
+    (sut/create-product boundary {:name "fox" :description "yellow"})
 
     (testing "get-all"
-      (let [{:keys [status body]} (sut/get-products {})
+      (let [{:keys [status body]} (sut/get-products boundary {})
             products (:products body)]
         (is (= 3 (count products))))
-      (let [{:keys [status body]} (sut/get-products {:name "panda"})
+      (let [{:keys [status body]} (sut/get-products boundary {:name "panda"})
             names (map #(:name %) (:products body))]
         (is (= ["panda" "lesser panda"] names))))
     (testing "delete"
-      (let [{:keys [status body]} (sut/delete-product id)]
+      (let [{:keys [status body]} (sut/delete-product boundary id)]
         (is (= 204 status))
-        (let [{:keys [status body]} (sut/get-products {})
+        (let [{:keys [status body]} (sut/get-products boundary {})
               products (:products body)]
           (is (= 2 (count products))))))))

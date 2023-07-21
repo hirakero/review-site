@@ -25,7 +25,18 @@
               ["/edit/:product-id" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.products/edit
                                     :post #ig/ref :isomorphic-clojure-webapp.ui.handler.products/edit-post}]
               ["/delete/:product-id" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.products/delete
-                                      :post #ig/ref :isomorphic-clojure-webapp.ui.handler.products/delete-post}]]]
+                                      :post #ig/ref :isomorphic-clojure-webapp.ui.handler.products/delete-post}]]
+             #_["/users"
+                ["" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.users/list}]
+                ["/signup" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.users/create
+                            :post #ig/ref :isomorphic-clojure-webapp.ui.handler.users/create-post}]
+                ["/signin" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.users/signin
+                            :post #ig/ref :isomorphic-clojure-webapp.ui.handler.users/signin-post}]
+                ["/detail/:user-id" #ig/ref :isomorphic-clojure-webapp.ui.handler.users/detail]
+                ["/edit/:user-id" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.users/edit
+                                   :post #ig/ref :isomorphic-clojure-webapp.ui.handler.users/edit-post}]
+                ["/delete/:user-id" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.users/delete
+                                     :post #ig/ref :isomorphic-clojure-webapp.ui.handler.users/delete-post}]]]
 
             ["/api" {:middleware [#ig/ref :duct.middleware.buddy/authentication]}
              ["/health" {:get {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.app/health}}]
@@ -68,14 +79,27 @@
                     :delete {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/delete
                              :middleware [#ig/ref :isomorphic-clojure-webapp.api.auth/wrap-user-only]}}]]]]]}
 
-  :isomorphic-clojure-webapp.ui.handler.products/list {}
-  :isomorphic-clojure-webapp.ui.handler.products/detail {}
-  :isomorphic-clojure-webapp.ui.handler.products/create {}
-  :isomorphic-clojure-webapp.ui.handler.products/create-post {}
-  :isomorphic-clojure-webapp.ui.handler.products/edit {}
-  :isomorphic-clojure-webapp.ui.handler.products/edit-post {}
-  :isomorphic-clojure-webapp.ui.handler.products/delete {}
-  :isomorphic-clojure-webapp.ui.handler.products/delete-post {}
+  :isomorphic-clojure-webapp.ui.boundary.web/host {:url "http://localhost:3000"}
+
+  :isomorphic-clojure-webapp.ui.handler.products/list {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
+  :isomorphic-clojure-webapp.ui.handler.products/detail {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
+  :isomorphic-clojure-webapp.ui.handler.products/create {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
+  :isomorphic-clojure-webapp.ui.handler.products/create-post {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
+  :isomorphic-clojure-webapp.ui.handler.products/edit {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
+  :isomorphic-clojure-webapp.ui.handler.products/edit-post {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
+  :isomorphic-clojure-webapp.ui.handler.products/delete {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
+  :isomorphic-clojure-webapp.ui.handler.products/delete-post {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
+
+;;   :isomorphic-clojure-webapp.ui.handler.users/list {}
+;;   :isomorphic-clojure-webapp.ui.handler.users/detail {}
+;;   :isomorphic-clojure-webapp.ui.handler.users/create {}
+;;   :isomorphic-clojure-webapp.ui.handler.users/create-post {}
+;;   :isomorphic-clojure-webapp.ui.handler.users/edit {}
+;;   :isomorphic-clojure-webapp.ui.handler.users/edit-post {}
+;;   :isomorphic-clojure-webapp.ui.handler.users/delete {}
+;;   :isomorphic-clojure-webapp.ui.handler.users/delete-post {}
+;;   :isomorphic-clojure-webapp.ui.handler.users/signin {}
+;;   :isomorphic-clojure-webapp.ui.handler.users/signin-post {}
 
   :isomorphic-clojure-webapp.api.handler.app/index {}
   :isomorphic-clojure-webapp.api.handler.app/health {}

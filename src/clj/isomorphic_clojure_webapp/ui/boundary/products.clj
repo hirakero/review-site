@@ -1,42 +1,35 @@
 (ns isomorphic-clojure-webapp.ui.boundary.products
-  (:require [isomorphic-clojure-webapp.ui.boundary.http-helper :as helper]))
+  (:require [isomorphic-clojure-webapp.ui.boundary.http-helper :as helper]
+            [isomorphic-clojure-webapp.ui.boundary.web]))
 
 (defprotocol Products
 
-  (get-products [query])
+  (get-products [this query])
 
-  (get-product-by-id [id])
+  (get-product-by-id [this id])
 
-  (create-product [values])
+  (create-product [this values])
 
-  (update-product [id values])
+  (update-product [this id values])
 
-  (delete-product [id]))
-
+  (delete-product [this id]))
 
 
 (extend-protocol Products
-  java.lang.Object
-  (get-products [query]
-    (let [query-string (->> (keys query)  (map #(str (name %) "=" (get query %))) (clojure.string/join "&"))
-          {:keys [status body]}  (helper/http-get (str "/api/products" (when-not (empty? query-string) (str "?" query-string))))]
-      {:status status :body body}))
+  isomorphic_clojure_webapp.ui.boundary.web.Boundary
 
-  (get-product-by-id [product-id]
-    (let [{:keys [status body]}  (helper/http-get (str "/api/products/" product-id))]
-      {:status status :body body}))
+  (get-products [{:keys [base-url]} query]
+    (let [query-string (->> (keys query)  (map #(str (name %) "=" (get query %))) (clojure.string/join "&"))]
+      (helper/http-get (str base-url "/api/products" (when-not (empty? query-string) (str "?" query-string))))))
 
-  (create-product [{:keys [name description]}]
-    (let [{:keys [status body]} (helper/http-post "/api/products"
-                                                  {:name name
-                                                   :description description})]
-      {:status status :body body}))
+  (get-product-by-id [{:keys [base-url]} product-id]
+    (helper/http-get (str base-url "/api/products/" product-id)))
 
-  (update-product [id values]
-    (let [{:keys [status body]} (helper/http-put (str "/api/products/" id) values)]
-      {:status status :body body}))
+  (create-product [{:keys [base-url]} values]
+    (helper/http-post (str base-url "/api/products") values))
 
-  (delete-product [product-id]
-    (let [{:keys [status body]} (helper/http-delete (str "/api/products/" product-id))]
-      {:status status :body body})))
+  (update-product [{:keys [base-url]} id values]
+    (helper/http-put (str base-url "/api/products/" id) values))
 
+  (delete-product [{:keys [base-url]} product-id]
+    (helper/http-delete (str base-url "/api/products/" product-id))))
