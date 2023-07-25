@@ -183,25 +183,25 @@
 (deftest handler-auth-test
   (testing "サインイン"
     (testing "正常、ユーザー情報とトークンを返す。パスワードは返さない"
-      (let [{:keys [status body]} (helper/http-post "/api/signup" {:name "alice"
-                                                                   :email "alice@example.com"
-                                                                   :password "password"})]
+      (let [{:keys [status body]} (helper/http-post "/api/users" {:name "alice"
+                                                                  :email "alice@example.com"
+                                                                  :password "password"})]
         (is (= 201 status))
         (is (match? {:name "alice"
                      :email "alice@example.com"}
-                    (:user body)))
+                    body))
         (is (not (contains? (:user body) :password)))
         (is (boolean (re-find jwt-regex (:token body ""))))))
     (testing "内容が不正なら400"
-      (let [{:keys [status body]} (helper/http-post "/api/signup" {:namae "alice"
-                                                                   :e-mail "alice@example.com"
-                                                                   :password 5})]
+      (let [{:keys [status body]} (helper/http-post "/api/users" {:namae "alice"
+                                                                  :e-mail "alice@example.com"
+                                                                  :password 5})]
         (is (= 400 status))
         (is (contains? body :spec))))
     (testing "既に登録されていたら409?"
-      (let [{:keys [status body]} (helper/http-post "/api/signup" {:name "alice"
-                                                                   :email "alice@example.com"
-                                                                   :password "password"})]
+      (let [{:keys [status body]} (helper/http-post "/api/users" {:name "alice"
+                                                                  :email "alice@example.com"
+                                                                  :password "password"})]
         (is (= 409 status)))))
 
   (testing "ログイン"

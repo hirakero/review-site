@@ -13,10 +13,19 @@
 
 (defmethod ig/init-key ::create [_ {:keys [db]}]
   (fn [{:keys [body-params]}]
-    (let [result (users/create-user db body-params)]
-      (if (empty? result)
-        (rres/bad-request nil)
-        (rres/created (str "/api/users/" (:id result)) result)))))
+    (let [{:keys [name email]} body-params]
+      (let [user-exists? (users/get-user-by db :name name)
+            email-exists? (users/get-user-by db :email email)]
+        (if (or user-exists? email-exists?)
+          {:status 409
+           :body {:error "already exists"}}
+          (if-let [result (users/create-user db body-params)]
+            (let [token (auth/create-token result)
+                  result (assoc result :token token)]
+              (rres/created (str "/api/users/" (:id result))
+                            result))
+            {:status 500
+             :body {:error ""}}))))))
 
 (defmethod ig/init-key ::fetch [_ {:keys [db]}]
   (fn [{:keys [path-params]}]
@@ -39,21 +48,6 @@
         (rres/not-found nil)
         {:status 204}))))
 
-(defmethod ig/init-key ::signup [_ {:keys [db]}]
-  (fn [{:keys [body-params]}]
-    (let [{:keys [name email]} body-params]
-      (let [user-exists? (users/get-user-by db :name name)
-            email-exists? (users/get-user-by db :email email)]
-        (if (or user-exists? email-exists?)
-          {:status 409
-           :body {:error "already exists"}}
-          (if-let [result (users/create-user db body-params)]
-            (let [token (auth/create-token result)]
-              (rres/created (str "/api/users/" (:id result))
-                            {:user result
-                             :token token}))
-            {:status 500
-             :body {:error ""}}))))))
 
 (defmethod ig/init-key ::signin [_ {:keys [db]}]
   (fn [{:keys [body-params]}]
