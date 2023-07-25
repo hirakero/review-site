@@ -15,8 +15,10 @@
    :secret "SECRET-KEY" #_#duct/env "SECRET-KEY"}
 
   :duct.router/reitit
-  {:routes [["/" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.app/index}]
-            ["/ui"
+  {:routes [#_["/" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.app/index}]
+            [["/" #ig/ref :isomorphic-clojure-webapp.ui.handler.common/top]
+             ["/abount" #ig/ref :isomorphic-clojure-webapp.ui.handler.common/top]
+             ["/contact" #ig/ref :isomorphic-clojure-webapp.ui.handler.common/top]
              ["/products"
               ["" #ig/ref :isomorphic-clojure-webapp.ui.handler.products/list]
               ["/create" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.products/create
@@ -27,7 +29,7 @@
               ["/delete/:product-id" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.products/delete
                                       :post #ig/ref :isomorphic-clojure-webapp.ui.handler.products/delete-post}]]
              ["/users"
-              ["" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.users/list}]
+              #_["" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.users/list}]
               ["/signup" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.users/create
                           :post #ig/ref :isomorphic-clojure-webapp.ui.handler.users/create-post}]
               ["/signin" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.users/signin
@@ -81,6 +83,8 @@
 
   :isomorphic-clojure-webapp.ui.boundary.web/host {:url "http://localhost:3000"}
 
+  :isomorphic-clojure-webapp.ui.handler.common/top {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
+
   :isomorphic-clojure-webapp.ui.handler.products/list {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
   :isomorphic-clojure-webapp.ui.handler.products/detail {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
   :isomorphic-clojure-webapp.ui.handler.products/create {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
@@ -90,7 +94,7 @@
   :isomorphic-clojure-webapp.ui.handler.products/delete {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
   :isomorphic-clojure-webapp.ui.handler.products/delete-post {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
 
-  :isomorphic-clojure-webapp.ui.handler.users/list {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
+  #_#_:isomorphic-clojure-webapp.ui.handler.users/list {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
   :isomorphic-clojure-webapp.ui.handler.users/detail {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
   :isomorphic-clojure-webapp.ui.handler.users/create {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
   :isomorphic-clojure-webapp.ui.handler.users/create-post {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
