@@ -3,9 +3,7 @@
             [duct.database.sql]
             [honey.sql :as sql]
             [honey.sql.helpers :as hh]
-            [isomorphic-clojure-webapp.api.boundary.db-helper :as dbh])
-  (:import (java.sql
-            SQLException)))
+            [isomorphic-clojure-webapp.api.boundary.db-helper :as dbh]))
 
 (defprotocol Users
 

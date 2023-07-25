@@ -3,8 +3,6 @@
             [buddy.auth.middleware :refer [wrap-authentication]]
             [buddy.sign.jwt :as jwt]
             [buddy.auth :as buddy]
-            #_[buddy.sign.jws :as jws]
-            [ring.util.response :as rres]
             [integrant.core :as ig]))
 
 (def secret-key "SECRET-KEY") ;TODO  環境変数から
@@ -12,7 +10,7 @@
 (def backend (backends/jws {:secret secret-key}))
 
 (defn create-token
-  "ユーザー情報のマップを受け取り、その情報をもとにjwsを返す"
+  "ユーザー情報のマップを受け取り、:expを追加して、jwsを返す"
   [{:keys [id name]}]
   (jwt/sign
    {:sub id
@@ -21,6 +19,11 @@
              (quot  1000)
              (+ exp-second))}
    secret-key))
+
+(defn parse-token
+  "JWTをマップに戻す"
+  [token]
+  (jwt/unsign token secret-key))
 
 (defmethod ig/init-key ::wrap-user-only [key _]
   (fn [handler]

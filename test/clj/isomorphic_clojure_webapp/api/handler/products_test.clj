@@ -3,8 +3,7 @@
             [isomorphic-clojure-webapp.ui.boundary.http-helper :as helper]
             [integrant.core :as ig]
             [integrant.repl.state :refer [system config]]
-            [next.jdbc :as jdbc]
-            [isomorphic-clojure-webapp.api.handler.products :as sut]))
+            [next.jdbc :as jdbc]))
 
 (comment
   (let [boundary (:duct.database.sql/hikaricp system)
@@ -71,7 +70,7 @@
           (is (= 200 status))
           (is (= "Hammer XT" (-> body :product :name)))))
 
-      (testing "対象データが無ければ 404 で, :user nilを返す"
+      (testing "対象データが無ければ 404 で, :product nilを返す"
         (let [{:keys [status body]} (helper/http-get (str "/api/products/00000000-0000-0000-0000-000000000000"))]
           (is (= 404 status))
           (is (contains? body :product))
@@ -130,6 +129,7 @@
           (let [{:keys [status body]} (helper/http-get "/api/products?name=Sparrow")]
             (is (= 200 status))
             (is (= "Sparrow" (-> body :products first :name)))))
+
         (testing "対象データが無ければ404で、:products nilを返す"
           (let [{:keys [status body]} (helper/http-get "/api/products?name=abc")]
             (is (= 404 status))

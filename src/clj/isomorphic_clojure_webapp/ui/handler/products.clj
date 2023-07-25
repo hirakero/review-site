@@ -67,7 +67,6 @@
 
 (defmethod ig/init-key ::edit [_ _]
   (fn [{:keys [path-params]}]
-    (println "pp " path-params)
     (if-let [result (-> (helper/http-get (str "/api/products/" (:product-id path-params)))
                         :body
                         :product)]
