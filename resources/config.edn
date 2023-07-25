@@ -38,8 +38,10 @@
               ["/:user-id" {:parameters {:path :isomorphic-clojure-webapp.spec.users/user-path}}
                ["" {:get  #ig/ref :isomorphic-clojure-webapp.api.handler.users/fetch
                     :put {:parameters {:body :isomorphic-clojure-webapp.spec.users/put-body}
-                          :handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/update}
-                    :delete {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/delete}}]
+                          :handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/update
+                          :middleware [#ig/ref :isomorphic-clojure-webapp.api.auth/wrap-user-only]}
+                    :delete {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/delete
+                             :middleware [#ig/ref :isomorphic-clojure-webapp.api.auth/wrap-user-only]}}]
                ["/reviews" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.reviews/list-by-user}]]]
              ["/signin" {:post {:parameters {:body :isomorphic-clojure-webapp.spec.users/signin-body}
                                 :handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/signin}}]

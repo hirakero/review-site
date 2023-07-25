@@ -10,7 +10,8 @@
             [isomorphic-clojure-webapp.api.boundary.users :as users]
             [next.jdbc :as jdbc]
             [matcher-combinators.clj-test]
-            [buddy.sign.jwt :as jwt]))
+            [buddy.sign.jwt :as jwt]
+            [isomorphic-clojure-webapp.api.auth :as auth]))
 
 #_(def ^:private alice-data {:id 1, :name "Alice", :email "alice@xample.com"})
 #_(def ^:private bob-data {:id 2, :name "Bob", :email "bob@example.com"})
@@ -131,7 +132,14 @@
                                                         {:name "Alice"
                                                          :email "alice@example.com"
                                                          :password "password"})
-        id (:id body)]
+        user1-id (:id body)
+        user1-token-header {"authorization" (str "Token " (:token body))}
+        {user2-body :body} (helper/http-post "/api/users"
+                                             {:name "Bob"
+                                              :email "bob@example.com"
+                                              :password "password"})
+        user2-token-header {"authorization" (str "Token " (:token user2-body))}
+        user0-token-header {"authorization" (str "Token " (auth/create-token {:id "00000000-0000-0000-0000-000000000000" :name "name"}))}]
     (testing "post /users 登録した内容を直接返す"
       (is (= status 201))
       (is (get headers "location"))
@@ -140,7 +148,7 @@
 
     (testing "get /users/:user-id "
       (testing "取得した内容を返す"
-        (let [{:keys [status body]} (helper/http-get (str "/api/users/" id))]
+        (let [{:keys [status body]} (helper/http-get (str "/api/users/" user1-id))]
           (is (= 200 status))
           (is (= "Alice" (-> body :user :name)))))
 
@@ -150,12 +158,28 @@
           (is (nil? body)))))
 
     (testing "put /users/:user-id"
+      (testing "authorizatin haderがなければ401"
+        (let [{:keys [status body]} (helper/http-put (str "/api/users/" user1-id)
+                                                     {:name "Alice Ackerman"})]
+          (is (= 401 status))))
+
+      (testing "他のユーザーは変更できない403"
+        (let [{:keys [status body]} (helper/http-put (str "/api/users/" user1-id)
+                                                     user2-token-header
+                                                     {:name "Alice Ackerman"})]
+          (is (= 403 status))))
+
       (testing "更新した内容を直接返す"
-        (let [{:keys [status body]} (helper/http-put (str "/api/users/" id) {:name "Alice Ackerman"})]
+        (let [{:keys [status body]} (helper/http-put (str "/api/users/" user1-id)
+                                                     user1-token-header
+                                                     {:name "Alice Ackerman"})]
           (is (= 200 status))
           (is (= "Alice Ackerman" (-> body :name)))))
+
       (testing "対象データが無ければ not foundで何も返さない"
-        (let [{:keys [status body]} (helper/http-put "/api/users/00000000-0000-0000-0000-000000000000" {:name "Alice Ackerman"})]
+        (let [{:keys [status body]} (helper/http-put "/api/users/00000000-0000-0000-0000-000000000000"
+                                                     user0-token-header
+                                                     {:name "Alice Ackerman"})]
           (is (= 404 status))
           (is (nil? body)))))
 
@@ -170,12 +194,23 @@
         (is (= 2 (-> body :users count)))))
 
     (testing "delete"
+      (testing "authorizatin haderがなければ401"
+        (let [{:keys [status body]} (helper/http-delete (str "/api/users/" user1-id)
+                                                        {:name "Alice Ackerman"})]
+          (is (= 401 status))))
+
+      (testing "他のユーザーは変更できない403"
+        (let [{:keys [status body]} (helper/http-delete (str "/api/users/" user1-id)
+                                                        user2-token-header)]
+          (is (= 403 status))))
       (testing "削除に成功したらno content で何も返さない"
-        (let [{:keys [status body]} (helper/http-delete (str "/api/users/" id))]
+        (let [{:keys [status body]} (helper/http-delete (str "/api/users/" user1-id)
+                                                        user1-token-header)]
           (is (= 204 status))
           (is (nil? body))))
       (testing "対象データが無ければ not found で何も返さない"
-        (let [{:keys [status body]} (helper/http-delete "/api/users/00000000-0000-0000-0000-000000000000")]
+        (let [{:keys [status body]} (helper/http-delete "/api/users/00000000-0000-0000-0000-000000000000"
+                                                        user0-token-header)]
           (is (= 404 status))
           (is (nil? body)))))))
 
@@ -227,16 +262,15 @@
         (is (= 200 status)))
       (let [{:keys [status body]} (helper/http-post "/api/signin" {:email "alice@example.com"
                                                                    :password "password"})]
-
         (is (= 200 status))))
+
     (testing "内容が不正なら400"
       (let [{:keys [status body]} (helper/http-post "/api/signin" {:me-ru "alice@example.com"
                                                                    :pw "password"})]
-
         (is (= 400 status)))))
+
   (testing "未登録のユーザーはエラーメッセージを返す"
     (let [{:keys [status body]} (helper/http-post "/api/signin" {:name "dave"
                                                                  :password "password"})]
-
       (is (= 401 status)))))
  

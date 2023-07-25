@@ -35,18 +35,26 @@
         (rres/response {:user result})))))
 
 (defmethod ig/init-key ::update [_ {:keys [db]}]
-  (fn [{:keys [path-params body-params]}]
-    (let [result (users/update-user db (:user-id path-params) body-params)]
-      (if (empty? result)
-        (rres/not-found nil)
-        (rres/response  result)))))
+  (fn [{:keys [path-params body-params identity]}]
+    (let [path-user-id (:user-id path-params)
+          token-user-id (:sub identity)]
+      (if (= path-user-id token-user-id)
+        (let [result (users/update-user db path-user-id body-params)]
+          (if (empty? result)
+            (rres/not-found nil)
+            (rres/response result)))
+        {:status 403}))))
 
 (defmethod ig/init-key ::delete [_ {:keys [db]}]
-  (fn [{:keys [path-params]}]
-    (let [result (users/delete-user db (:user-id path-params))]
-      (if (empty? result)
-        (rres/not-found nil)
-        {:status 204}))))
+  (fn [{:keys [path-params identity]}]
+    (let [token-user-id (:sub identity)
+          path-user-id (:user-id path-params)]
+      (if (= path-user-id token-user-id)
+        (let [result (users/delete-user db path-user-id)]
+          (if (empty? result)
+            (rres/not-found nil)
+            {:status 204}))
+        {:status 403}))))
 
 
 (defmethod ig/init-key ::signin [_ {:keys [db]}]
