@@ -4,7 +4,6 @@
             [isomorphic-clojure-webapp.ui.boundary.products :as products]))
 
 
-
 (defmethod ig/init-key ::list [_ {:keys [host]}]
   (fn [{qp :query-params}]
     (let [{:keys [status body]}  (products/get-products host qp)]
@@ -13,16 +12,33 @@
           [:ul (for [{:keys [name id]} (:products body)]
                  [:li [:a {:href (str "/ui/products/detail/" id)} name]])]))))
 
+(defmethod ig/init-key ::search [_ {:keys [host]}]
+  (fn [{{:keys [product-id]} :path-params
+        qp :query-params}]
+    (let [products (products/get-products host qp)]
+
+
+      (ok [:h2 "商品検索"]
+          [:dl
+           [:label  "name:"] [:input {:type :text}]
+           [:button "検索"]]
+          #_[:div
+             [:a {:href (str "/ui/products/edit/" product-id)} "edit"] " / " [:a {:href (str "/ui/products/delete/" product-id)} "delete"]]))))
+
 (defmethod ig/init-key ::detail [_ {:keys [host]}]
   (fn [{{:keys [product-id]} :path-params}]
     (let [{:keys [status body]} (products/get-product-by-id host product-id)
           {:keys [name description]} (:product body)]
-      (ok [:h2 "product detail"]
+
+      (ok [:h2 "商品情報"]
+          [:div name]
           [:dl
            [:dt  "name:"] [:dd name]
            [:dt  "description: "] [:dd description]]
-          [:div
-           [:a {:href (str "/ui/products/edit/" product-id)} "edit"] " / " [:a {:href (str "/ui/products/delete/" product-id)} "delete"]]
+          [:div "レビューを書く"]
+          [:div  "レビュ一覧"]
+          #_[:div
+             [:a {:href (str "/ui/products/edit/" product-id)} "edit"] " / " [:a {:href (str "/ui/products/delete/" product-id)} "delete"]]
           [:div
            [:a {:href "/ui/products"} "product list"]]))))
 

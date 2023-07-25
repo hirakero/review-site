@@ -1,15 +1,15 @@
 (ns isomorphic-clojure-webapp.ui.handler.users
   (:require [integrant.core :as ig]
             [isomorphic-clojure-webapp.ui.response :refer [ok see-other]]
-            [isomorphic-clojure-webapp.ui.boundary.users :as users]))
+            [isomorphic-clojure-webapp.ui.boundary.users :as users]
+            [isomorphic-clojure-webapp.ui.view.template :refer [template]]))
 
-(defmethod ig/init-key ::list [_ {:keys [host]}]
-  (fn [{qp :query-params}]
-    (let [users  (-> (users/get-users host qp) :body :users)]
-      (ok [:h2 "user list"]
-          [:a {:href "/ui/users/signup"} "create"]
-          [:ul (for [{:keys [name id]} users]
-                 [:li [:a {:href (str "/ui/users/detail/" id)} name]])]))))
+;; (defmethod ig/init-key ::list [_ {:keys [host]}]
+;;     (fn [{qp :query-params}]
+;;       (let [users  (-> (users/get-users host qp) :body :users)]
+;;         (apply ok (template  [:a {:href "/ui/users/signup"} "create"]
+;;                              [:ul (for [{:keys [name id]} users]
+;;                                     [:li [:a {:href (str "/ui/users/detail/" id)} name]])])))))
 
 (defmethod ig/init-key ::detail [_ {:keys [host]}]
   (fn [{{:keys [user-id]} :path-params}]
@@ -96,17 +96,16 @@
 
 (defmethod ig/init-key ::signin [_ _]
   (fn [req]
-    (ok [:h2 "user create"]
+    (ok [:h2 "sign in"]
         [:form {:method :post :action ""}
          [:dl
-          [:dt [:label {:for "name"} "name"]]
+          [:dt [:label {:for "name"} "user name or password"]]
           [:dd [:input {:type :text :name "name" :id "name" :required "required"}]]
-          [:dt [:label {:for "email"} "email"]]
-          [:dd [:input {:type :text :name "email" :id "email"}]]
           [:dt [:label {:for "password"} "password"]]
           [:dd [:input {:type :text :name "password" :id "password"}]]]
          [:div
-          [:button {:type :submit} "create"]]])))
+          [:button {:type :submit} "sign in"]]]
+        [:a {:href "/users/signup"} "sign up here"])))
 
 (defmethod ig/init-key ::signin-post [_ {:keys [host]}]
   (fn [{:keys [form-params]}]
