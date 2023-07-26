@@ -37,7 +37,7 @@
     (let [result (users/delete-user db (:user-id path-params))]
       (if (empty? result)
         (rres/not-found nil)
-        {:status 204}))))
+        (rres/status 204)))))
 
 (defmethod ig/init-key ::signup [_ {:keys [db]}]
   (fn [{:keys [body-params]}]
@@ -60,9 +60,8 @@
     (let [{:keys [name email password]} body-params]
       (if-let [result (users/signin db body-params)]
         (let [token (auth/create-token result)]
-          {:status 200
-           :body {:user result
-                  :token token}})
+          (rres/response {:user result
+                          :token token}))
         {:status 401
          :body {:error "signin failed"}}))))
 
