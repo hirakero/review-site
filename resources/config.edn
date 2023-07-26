@@ -79,6 +79,7 @@
   :isomorphic-clojure-webapp.ui.handler.products/delete-post {}
 
   :isomorphic-clojure-webapp.api.auth/wrap-user-only {}
+  :isomorphic-clojure-webapp.api.auth/wrap-admin-only {}
 
   :isomorphic-clojure-webapp.api.handler.app/index {}
   :isomorphic-clojure-webapp.api.handler.app/health {}
