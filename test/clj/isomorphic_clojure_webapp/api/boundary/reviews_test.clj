@@ -17,16 +17,6 @@
       (jdbc/execute! ds ["delete from reviews"]))
     (f)))
 
-;"00000000-0000-0000-0000-000000000000"
-(comment
-  (users/create-user (:duct.database.sql/hikaricp system) {:name "Alice"
-                                                           :email "alice@email.com"
-                                                           :password "password"})
-
-  (sut/get-reviews-by-product (:duct.database.sql/hikaricp system) "00000000-0000-0000-0000-000000000000")
-  (sut/get-review-by-id (:duct.database.sql/hikaricp system) "00000000-0000-0000-0000-000000000000")
-  (sut/delete-review (:duct.database.sql/hikaricp system) "00000000-0000-0000-0000-000000000000"))
-
 (deftest reviews-boundary-test
   (let [boundary (:duct.database.sql/hikaricp system)]
     (let [{user1-id :id} (users/create-user boundary {:name "Alice"
@@ -101,15 +91,14 @@
             (is (= 3 (count result))))
 
           (testing "product 指定の取得"
-            (testing ""
+            (testing "新しいレビューが先頭"
               (let [results (sut/get-reviews-by-product boundary product1-id)]
                 (is (vector? results))
                 (is (= 2 (count results)))
 
-                (let [review (-> (filter #(= (:id %) id) results)
-                                 first)]
-                  (is (= "Alice" (:user-name review)))
-                  (is (= "marvelous" (:title review))))))
+                (let [review  (first results)]
+                  (is (= "Bob" (:user-name review)))
+                  (is (= "pretty cute" (:title review))))))
             (testing ""
               (let [results (sut/get-reviews-by-product boundary product3-id)]
                 (is (empty? results)))))

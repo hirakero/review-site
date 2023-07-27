@@ -10,7 +10,6 @@
             [isomorphic-clojure-webapp.api.boundary.users :as users]
             [next.jdbc :as jdbc]
             [matcher-combinators.clj-test]
-            [buddy.sign.jwt :as jwt]
             [isomorphic-clojure-webapp.api.auth :as auth]))
 
 #_(def ^:private alice-data {:id 1, :name "Alice", :email "alice@xample.com"})
@@ -251,8 +250,7 @@
                      :email "alice@example.com"}
                     user))
         (is (not (contains? user :password)))
-
-        (let [claim  (jwt/unsign (:token body) "SECRET-KEY")] ;TODO
+        (let [claim  (auth/parse-token (:token body))]
           (is (= (:id user) (:sub claim)))
           (is (= (:name user) (:name claim)))))
 
