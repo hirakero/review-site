@@ -16,5 +16,5 @@
 (s/def ::user-path (s/keys :req-un [::user-id]))
 
 (s/def ::signin-body (s/keys :req-un [(or ::name ::email) ::password]))
-(s/def ::signup-body (s/keys :req-un [::name ::email ::password]))
+(s/def ::post-body (s/keys :req-un [::name ::email ::password]))
 (s/def ::put-body (s/keys :req-un [(or ::name ::email ::password)]))

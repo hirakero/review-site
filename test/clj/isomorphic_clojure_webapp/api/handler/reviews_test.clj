@@ -19,7 +19,7 @@
 
 (comment
   (let [;正規ユーザー追加
-        {{user1-id :id} :body}  (helper/http-post "/api/signup"
+        {{user1-id :id} :body}  (helper/http-post "/api/users"
                                                   {:name "Chris"
                                                    :email "chris@email.com"
                                                    :password "password"})
@@ -49,11 +49,11 @@
 
 (deftest handler-reviews-test
   (let [;正規ユーザー追加
-        resultu1 (helper/http-post "/api/signup"
+        resultu1 (helper/http-post "/api/users"
                                    {:name "Chris"
                                     :email "chris@email.com"
                                     :password "password"})
-        {{{user1-id :id} :user} :body} resultu1
+        {{user1-id :id} :body} resultu1
         ;サインイン、トークン保持
         {{user1-token :token} :body} (helper/http-post "/api/signin"
                                                        {:name "Chris"
@@ -62,7 +62,7 @@
         user1-token-header {"authorization" (str "Token " user1-token)}
 
         ;他のユーザー追加
-        _  (helper/http-post "/api/signup"
+        _  (helper/http-post "/api/users"
                              {:name "Dave"
                               :email "dave@email.com"
                               :password "password"})
@@ -74,11 +74,11 @@
 
         user2-token-header {"authorization" (str "Token " user2-token)}
 
-        resultu3 (helper/http-post "/api/signup"
+        resultu3 (helper/http-post "/api/users"
                                    {:name "Eric"
                                     :email "eric@email.com"
                                     :password "password"})
-        {{{user3-id :id} :user} :body} resultu3
+        {{user3-id :id} :body} resultu3
         ;商品追加
         {{product1-id :id} :body} (helper/http-post "/api/products"
                                                     {:name "sr400"
