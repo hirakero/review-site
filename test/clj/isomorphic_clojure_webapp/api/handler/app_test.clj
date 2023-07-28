@@ -6,9 +6,9 @@
 (deftest handler-app-test
   (testing "tokenのテスト"
     (let [base-url "http://localhost:3000"
-          _ (helper/http-post (str base-url "/api/signup") {:name "Bob"
-                                                            :email "bob@example.com"
-                                                            :password "password"})
+          _ (helper/http-post (str base-url "/api/users") {:name "Bob"
+                                                           :email "bob@example.com"
+                                                           :password "password"})
           {:keys [status body]} (helper/http-post (str base-url "/api/signin") {:name "Bob"
                                                                                 :email "bob@example.com"
                                                                                 :password "password"})

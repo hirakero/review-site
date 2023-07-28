@@ -133,6 +133,7 @@
                       (hh/from [:reviews :r])
                       (hh/inner-join [:users :u]  [:= :r.user-id :u.id])
                       (hh/where := :r.product-id [:uuid product-id])
+                      (hh/order-by [:updated :desc])
                       (sql/format)
                       #_((fn [s] (println "\nsql " s) (def *sql s) s))
                       (dbh/execute! db)
@@ -145,6 +146,7 @@
                       (hh/from [:reviews :r])
                       (hh/inner-join [:products :p] [:= :r.product-id :p.id])
                       (hh/where := :user-id [:uuid user-id])
+                      (hh/order-by [:updated :desc])
                       (sql/format)
                       #_((fn [s] (println "\nsql " s) (def *sql s) s))
                       (dbh/execute! db))]

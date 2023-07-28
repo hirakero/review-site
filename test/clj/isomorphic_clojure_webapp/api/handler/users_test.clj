@@ -10,7 +10,7 @@
             [isomorphic-clojure-webapp.api.boundary.users :as users]
             [next.jdbc :as jdbc]
             [matcher-combinators.clj-test]
-            [buddy.sign.jwt :as jwt]))
+            [isomorphic-clojure-webapp.api.auth :as auth]))
 
 #_(def ^:private alice-data {:id 1, :name "Alice", :email "alice@xample.com"})
 #_(def ^:private bob-data {:id 2, :name "Bob", :email "bob@example.com"})
@@ -132,7 +132,14 @@
                                                           {:name "Alice"
                                                            :email "alice@example.com"
                                                            :password "password"})
-          id (:id body)]
+          user1-id (:id body)
+          user1-token-header {"authorization" (str "Token " (:token body))}
+          {user2-body :body} (helper/http-post (str base-url "/api/users")
+                                               {:name "Bob"
+                                                :email "bob@example.com"
+                                                :password "password"})
+          user2-token-header {"authorization" (str "Token " (:token user2-body))}
+          user0-token-header {"authorization" (str "Token " (auth/create-token {:id "00000000-0000-0000-0000-000000000000" :name "name"}))}]
       (testing "post /users 登録した内容を直接返す"
         (is (= status 201))
         (is (get headers "location"))
@@ -141,7 +148,7 @@
 
       (testing "get /users/:user-id "
         (testing "取得した内容を返す"
-          (let [{:keys [status body]} (helper/http-get (str base-url "/api/users/" id))]
+          (let [{:keys [status body]} (helper/http-get (str base-url "/api/users/" user1-id))]
             (is (= 200 status))
             (is (= "Alice" (-> body :user :name)))))
 
@@ -151,16 +158,30 @@
             (is (nil? body)))))
 
       (testing "put /users/:user-id"
+        (testing "authorizatin haderがなければ401"
+          (let [{:keys [status body]} (helper/http-put (str base-url "/api/users/" user1-id)
+                                                       {:name "Alice Ackerman"})]
+            (is (= 401 status))))
+
+        (testing "他のユーザーは変更できない403"
+          (let [{:keys [status body]} (helper/http-put (str base-url "/api/users/" user1-id)
+                                                       user2-token-header
+                                                       {:name "Alice Ackerman"})]
+            (is (= 403 status))))
+
         (testing "更新した内容を直接返す"
-          (let [{:keys [status body]} (helper/http-put (str base-url "/api/users/" id)
+          (let [{:keys [status body]} (helper/http-put (str base-url "/api/users/" user1-id)
+                                                       user1-token-header
                                                        {:name "Alice Ackerman"})]
             (is (= 200 status))
             (is (= "Alice Ackerman" (-> body :name)))))
         (testing "対象データが無ければ not foundで何も返さない"
           (let [{:keys [status body]} (helper/http-put (str base-url "/api/users/00000000-0000-0000-0000-000000000000")
+                                                       user0-token-header
                                                        {:name "Alice Ackerman"})]
             (is (= 404 status))
             (is (nil? body)))))
+
 
       (testing "get /users データの配列を返す"
         (helper/http-post (str base-url "/api/users")
@@ -173,44 +194,62 @@
           (is (= 2 (-> body :users count)))))
 
       (testing "delete"
+        (testing "authorizatin haderがなければ401"
+          (let [{:keys [status body]} (helper/http-delete (str base-url "/api/users/" user1-id)
+                                                          {:name "Alice Ackerman"})]
+            (is (= 401 status))))
+
+        (testing "他のユーザーは変更できない403"
+          (let [{:keys [status body]} (helper/http-delete (str base-url "/api/users/" user1-id)
+                                                          user2-token-header)]
+            (is (= 403 status))))
         (testing "削除に成功したらno content で何も返さない"
-          (let [{:keys [status body]} (helper/http-delete (str base-url "/api/users/" id))]
+          (let [{:keys [status body]} (helper/http-delete (str base-url "/api/users/" user1-id)
+                                                          user1-token-header)]
             (is (= 204 status))
             (is (nil? body))))
         (testing "対象データが無ければ not found で何も返さない"
-          (let [{:keys [status body]} (helper/http-delete (str base-url "/api/users/00000000-0000-0000-0000-000000000000"))]
+          (let [{:keys [status body]} (helper/http-delete (str base-url "/api/users/00000000-0000-0000-0000-000000000000")
+                                                          user0-token-header)]
             (is (= 404 status))
             (is (nil? body))))))))
 
+
+(comment
+  (auth/create-token {:name "alice"
+                      :email "alice@example.com"
+                      :password "password"})
+  (def base-url "http://localhost:3000"))
 (def jwt-regex #"^[A-Za-z0-9-_]+?.[A-Za-z0-9-_]+?.[A-Za-z0-9-_]+$")
 (deftest handler-auth-test
   (let [base-url "http://localhost:3000"]
-    (testing "サインイン"
+    (testing "サインアップ"
       (testing "正常、ユーザー情報とトークンを返す。パスワードは返さない"
-        (let [{:keys [status body]} (helper/http-post (str base-url "/api/signup")
+        (let [{:keys [status body]} (helper/http-post (str base-url "/api/users")
                                                       {:name "alice"
                                                        :email "alice@example.com"
                                                        :password "password"})]
           (is (= 201 status))
           (is (match? {:name "alice"
                        :email "alice@example.com"}
-                      (:user body)))
-          (is (not (contains? (:user body) :password)))
+                      body))
+          (is (not (contains?  body :password)))
           (is (boolean (re-find jwt-regex (:token body ""))))))
       (testing "内容が不正なら400"
-        (let [{:keys [status body]} (helper/http-post (str base-url "/api/signup") {:namae "alice"
-                                                                                    :e-mail "alice@example.com"
-                                                                                    :password 5})]
+        (let [{:keys [status body]} (helper/http-post (str base-url "/api/users")
+                                                      {:namae "alice"
+                                                       :e-mail "alice@example.com"
+                                                       :password 5})]
           (is (= 400 status))
           (is (contains? body :spec))))
       (testing "既に登録されていたら409?"
-        (let [{:keys [status body]} (helper/http-post (str base-url "/api/signup")
+        (let [{:keys [status body]} (helper/http-post (str base-url "/api/users")
                                                       {:name "alice"
                                                        :email "alice@example.com"
                                                        :password "password"})]
           (is (= 409 status)))))
 
-    (testing "ログイン"
+    (testing "サインイン"
       (testing "正常、ユーザー情報とトークンを返す。パスワードは返さない"
         (let [{:keys [status body]} (helper/http-post (str base-url "/api/signin")
                                                       {:name "alice"
@@ -223,8 +262,7 @@
                        :email "alice@example.com"}
                       user))
           (is (not (contains? user :password)))
-
-          (let [claim  (jwt/unsign (:token body) "SECRET-KEY")] ;TODO
+          (let [claim  (auth/parse-token (:token body))]
             (is (= (:id user) (:sub claim)))
             (is (= (:name user) (:name claim)))))
 
@@ -245,8 +283,9 @@
 
           (is (= 400 status)))))
     (testing "未登録のユーザーはエラーメッセージを返す"
-      (let [{:keys [status body]} (helper/http-post (str base-url "/api/signin") {:name "dave"
-                                                                                  :password "password"})]
+      (let [{:keys [status body]} (helper/http-post (str base-url "/api/signin")
+                                                    {:name "dave"
+                                                     :password "password"})]
 
         (is (= 401 status))))))
  

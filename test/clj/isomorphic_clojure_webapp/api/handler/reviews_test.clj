@@ -17,15 +17,16 @@
       (jdbc/execute! ds ["delete from products"]))
     (f)))
 
-
+(comment
+  (def base-url "http://localhost:3000"))
 (deftest handler-reviews-test
   (let [base-url "http://localhost:3000"]
     (let [;正規ユーザー追加
-          resultu1 (helper/http-post (str base-url "/api/signup")
-                                     {:name "Chris"
-                                      :email "chris@email.com"
-                                      :password "password"})
-          {{{user1-id :id} :user} :body} resultu1
+          {{user1-id :id}  :body} (helper/http-post (str base-url "/api/users")
+                                                    {:name "Chris"
+                                                     :email "chris@email.com"
+                                                     :password "password"})
+
         ;サインイン、トークン保持
           {{user1-token :token} :body} (helper/http-post (str base-url "/api/signin")
                                                          {:name "Chris"
@@ -34,7 +35,7 @@
           user1-token-header {"authorization" (str "Token " user1-token)}
 
         ;他のユーザー追加
-          _  (helper/http-post (str base-url "/api/signup")
+          _  (helper/http-post (str base-url "/api/users")
                                {:name "Dave"
                                 :email "dave@email.com"
                                 :password "password"})
@@ -46,11 +47,11 @@
 
           user2-token-header {"authorization" (str "Token " user2-token)}
 
-          resultu3 (helper/http-post (str base-url "/api/signup")
+          resultu3 (helper/http-post (str base-url "/api/users")
                                      {:name "Eric"
                                       :email "eric@email.com"
                                       :password "password"})
-          {{{user3-id :id} :user} :body} resultu3
+          {{user3-id :id}  :body} resultu3
         ;商品追加
           {{product1-id :id} :body} (helper/http-post (str base-url "/api/products")
                                                       {:name "sr400"
@@ -150,7 +151,6 @@
         (testing "商品がなければ 404"
           (let [{:keys [status body]} (helper/http-get (str base-url "/api/products/" "00000000-0000-0000-0000-000000000000" "/reviews"))]
             (is (= 404 status)))))
-
 
 
       (testing " get /users/:user-id/reviews"

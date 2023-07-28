@@ -7,7 +7,6 @@
 
 (def secret-key "SECRET-KEY") ;TODO  環境変数から
 (def exp-second 3600)
-(def backend (backends/jws {:secret secret-key}))
 
 (defn create-token
   "ユーザー情報のマップを受け取り、:expを追加して、jwsを返す"
@@ -25,15 +24,22 @@
   [token]
   (jwt/unsign token secret-key))
 
-(defmethod ig/init-key ::wrap-user-only [key _]
+(defmethod ig/init-key ::wrap-user-only [_ _]
   (fn [handler]
     (fn [req]
       (if-not (buddy/authenticated? req)
         {:status 401 :body {:error "unaudorized"}}
         (handler req)))))
 
-#_(defn wrap-jwt-authentication [handler]
-    (wrap-authentication handler backend))
+(defmethod  ig/init-key ::wrap-admin-only [_ _]
+  (fn [handler]
+    (fn [req]
+      (let [role (some-> req
+                         :identity
+                         :role)]
+        (if (= role :admin)
+          (handler req)
+          {:status 401 :body {:error "unaudorized"}})))))
 
-
-
+;wrap-users-owner-only
+;wrap-reviews-owner-only
