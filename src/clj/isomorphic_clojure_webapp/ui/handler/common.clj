@@ -9,39 +9,34 @@
     (apply ok (template
                [:div
                 [:h3 "ranking"]
-                [:div
-                 [:div "1位"]
-                 [:img {:src ""}]
-                 [:div  "name link"]]
-                [:div
-                 [:div "2位"]
-                 [:img {:src ""}]
-                 [:div  "name link"]]
-                [:div
-                 [:div "3位"]
-                 [:img {:src ""}]
-                 [:div  "name link"]]
-                [:div
-                 [:div "4位"]
-                 [:img {:src ""}]
-                 [:div  "name link"]]
-                [:div
-                 [:div "5位"]
-                 [:img {:src ""}]
-                 [:div  "name link"]]]
+                (for [i (range 1 6)]
+                  [:div
+                   [:div (str i "位")]
+                   [:img {:src ""}]
+                   [:div  "name link"]])]
 
-               [:h2 "recent"]
-               [:ul
-                [:li "1位 name link"]
-                [:li "2位"]
-                [:li "3位"]
-                [:li "4位"]
-                [:li "5位"]]
-               [:h2 "new item"]
-               [:ul
-                [:li "name 2023.7.7"]
-                [:li "name 2023.7.7"]
-                [:li "name 2023.7.7"]
-                [:li "name 2023.7.7"]
-                [:li "name 2023.7.7"]]))))
+               [:div
+                [:h3 "recent"]
+                (for [i (range 1 6)]
+                  [:div
+                   [:div "product name(link)"]
+                   [:img {:src ""}]
+                   [:div "date"]
+                   [:div "user name(link)"]])]
+               [:div
+                [:h3 "new item"]
+                (for [_ (range 5)]
+                  [:div
+                   [:div "product name(link)"]
+                   [:img {:src ""}]
+                   [:div "date"]
+                   [:div "title"]])]))))
 
+(defmethod ig/init-key ::about [_ _]
+  (fn [_]
+    (apply ok (template
+               [:h2 "about"]))))
+(defmethod ig/init-key ::contact [_ _]
+  (fn [_]
+    (apply ok (template
+               [:h2 "contact"]))))

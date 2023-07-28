@@ -8,9 +8,9 @@
   (fn [{qp :query-params}]
     (let [{:keys [status body]}  (products/get-products host qp)]
       (ok [:h2 "product list"]
-          [:a {:href "/ui/products/create"} "create"]
+          [:a {:href "/products/create"} "create"]
           [:ul (for [{:keys [name id]} (:products body)]
-                 [:li [:a {:href (str "/ui/products/detail/" id)} name]])]))))
+                 [:li [:a {:href (str "/products/detail/" id)} name]])]))))
 
 (defmethod ig/init-key ::search [_ {:keys [host]}]
   (fn [{{:keys [product-id]} :path-params
@@ -23,7 +23,7 @@
            [:label  "name:"] [:input {:type :text}]
            [:button "検索"]]
           #_[:div
-             [:a {:href (str "/ui/products/edit/" product-id)} "edit"] " / " [:a {:href (str "/ui/products/delete/" product-id)} "delete"]]))))
+             [:a {:href (str "/products/edit/" product-id)} "edit"] " / " [:a {:href (str "/products/delete/" product-id)} "delete"]]))))
 
 (defmethod ig/init-key ::detail [_ {:keys [host]}]
   (fn [{{:keys [product-id]} :path-params}]
@@ -38,9 +38,13 @@
           [:div "レビューを書く"]
           [:div  "レビュ一覧"]
           #_[:div
-             [:a {:href (str "/ui/products/edit/" product-id)} "edit"] " / " [:a {:href (str "/ui/products/delete/" product-id)} "delete"]]
-          [:div
-           [:a {:href "/ui/products"} "product list"]]))))
+             [:a {:href (str "/products/edit/" product-id)} "edit"] " / " [:a {:href (str "/products/delete/" product-id)} "delete"]]
+          [:hr]
+          (for [_ (range 5)]
+            [:div [:h3 "title"]
+             [:div "content"]
+             [:div "date"]
+             [:div "user name"]])))))
 
 (defmethod ig/init-key ::create [_ _]
   (fn [req]
@@ -59,7 +63,7 @@
     (let [{:strs [name description]} form-params]
       (let [{:keys [status]} (products/create-product host form-params)]
         (if (= status 201)
-          (see-other (str "/ui/products"))
+          (see-other (str "/products"))
           (ok [:h2  "product create"]
               [:div "error"]))))))
 
@@ -82,7 +86,7 @@
   (fn [{:keys [form-params path-params]}]
     (let [{:keys [status body]}  (products/update-product host (:product-id path-params) form-params)]
       (if (= status 200)
-        (see-other (str "/ui/products"))
+        (see-other (str "/products"))
         (ok [:h2  "product edit"]
             [:div "error"])))))
 
@@ -105,6 +109,6 @@
   (fn [{:keys [path-params]}]
     (let [{:keys [status]} (products/delete-product host (:product-id path-params))]
       (if (= 204 status)
-        (see-other (str "/ui/products"))
+        (see-other (str "/products"))
         (ok [:h2 "product delete post"]
             [:div "error"])))))

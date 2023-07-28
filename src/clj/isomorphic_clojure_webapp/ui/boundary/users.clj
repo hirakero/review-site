@@ -11,7 +11,9 @@
 
   (update-user [this id values])
 
-  (delete-user [this id]))
+  (delete-user [this id])
+
+  (signin [this values]))
 
 
 
@@ -32,4 +34,7 @@
     (helper/http-put (str base-url "/api/users/" id) values))
 
   (delete-user [{:keys [base-url]} user-id]
-    (helper/http-delete (str base-url "/api/users/" user-id))))
+    (helper/http-delete (str base-url "/api/users/" user-id)))
+
+  (signin [{:keys [base-url]} values]
+    (helper/http-post (str base-url "/api/signin") values)))

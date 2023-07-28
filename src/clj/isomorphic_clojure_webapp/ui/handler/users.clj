@@ -7,9 +7,9 @@
 ;; (defmethod ig/init-key ::list [_ {:keys [host]}]
 ;;     (fn [{qp :query-params}]
 ;;       (let [users  (-> (users/get-users host qp) :body :users)]
-;;         (apply ok (template  [:a {:href "/ui/users/signup"} "create"]
+;;         (apply ok (template  [:a {:href "/users/signup"} "create"]
 ;;                              [:ul (for [{:keys [name id]} users]
-;;                                     [:li [:a {:href (str "/ui/users/detail/" id)} name]])])))))
+;;                                     [:li [:a {:href (str "/users/detail/" id)} name]])])))))
 
 (defmethod ig/init-key ::detail [_ {:keys [host]}]
   (fn [{{:keys [user-id]} :path-params}]
@@ -20,9 +20,13 @@
            [:dt  "email: "] [:dd email]
            [:dt  "passrord: "] [:dd "*****"]]
           [:div
-           [:a {:href (str "/ui/users/edit/" user-id)} "edit"] " / " [:a {:href (str "/ui/users/delete/" user-id)} "delete"]]
-          [:div
-           [:a {:href "/ui/users"} "users list"]]))))
+           [:a {:href (str "/users/edit/" user-id)} "edit"] " / " [:a {:href (str "/users/delete/" user-id)} "delete"]]
+          [:hr]
+          (for [_ (range 5)]
+            [:div [:h3 "product name"]
+             [:div "date"]
+             [:div "title"]
+             [:div "content"]])))))
 
 (defmethod ig/init-key ::create [_ _]
   (fn [req]
@@ -44,7 +48,7 @@
           form-params ()]
       (let [{:keys [status]} (users/create-user host form-params)]
         (if (= status 201)
-          (see-other (str "/ui/users"))
+          (see-other (str "/"))
           (ok [:h2  "user create"]
               [:div "error"]))))))
 
@@ -69,7 +73,7 @@
   (fn [{:keys [form-params path-params]}]
     (let [{:keys [status body]}  (users/update-user host (:user-id path-params) form-params)]
       (if (= status 200)
-        (see-other (str "/ui/users"))
+        (see-other (str "/"))
         (ok [:h2  "user edit"]
             [:div "error"])))))
 
@@ -90,7 +94,7 @@
   (fn [{:keys [path-params]}]
     (let [{:keys [status]} (users/delete-user host (:user-id path-params))]
       (if (= 204 status)
-        (see-other (str "/ui/users"))
+        (see-other (str "/"))
         (ok [:h2 "user delete post"]
             [:div "error"])))))
 
@@ -110,8 +114,8 @@
 (defmethod ig/init-key ::signin-post [_ {:keys [host]}]
   (fn [{:keys [form-params]}]
     (let [{:strs [name email password]} form-params]
-      (let [{:keys [status]} (users/create-user host form-params)]
+      (let [{:keys [status]} (users/signin host form-params)]
         (if (= status 201)
-          (see-other (str "/ui/users"))
+          (see-other (str "/"))
           (ok [:h2  "user signin"]
               [:div "error"]))))))

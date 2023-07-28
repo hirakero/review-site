@@ -17,8 +17,8 @@
   :duct.router/reitit
   {:routes [#_["/" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.app/index}]
             [["/" #ig/ref :isomorphic-clojure-webapp.ui.handler.common/top]
-             ["/abount" #ig/ref :isomorphic-clojure-webapp.ui.handler.common/top]
-             ["/contact" #ig/ref :isomorphic-clojure-webapp.ui.handler.common/top]
+             ["/about" #ig/ref :isomorphic-clojure-webapp.ui.handler.common/about]
+             ["/contact" #ig/ref :isomorphic-clojure-webapp.ui.handler.common/contact]
              ["/products"
               ["" #ig/ref :isomorphic-clojure-webapp.ui.handler.products/list]
               ["/create" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.products/create
@@ -85,6 +85,8 @@
   :isomorphic-clojure-webapp.ui.boundary.web/host {:url "http://localhost:3000"}
 
   :isomorphic-clojure-webapp.ui.handler.common/top {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
+  :isomorphic-clojure-webapp.ui.handler.common/about {}
+  :isomorphic-clojure-webapp.ui.handler.common/contact {}
 
   :isomorphic-clojure-webapp.ui.handler.products/list {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
   :isomorphic-clojure-webapp.ui.handler.products/detail {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
