@@ -43,7 +43,7 @@
           (if (empty? result)
             (rres/not-found nil)
             (rres/response result)))
-        {:status 403}))))
+        (rres/status 403)))))
 
 (defmethod ig/init-key ::delete [_ {:keys [db]}]
   (fn [{:keys [path-params identity]}]

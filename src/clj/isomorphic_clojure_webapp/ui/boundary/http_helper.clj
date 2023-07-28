@@ -1,12 +1,10 @@
 (ns isomorphic-clojure-webapp.ui.boundary.http-helper
   (:require [clj-http.client :as client]))
 
-(def ^:private base-url "http://localhost:3000")
-
 (defn http-get
   ([path] (http-get path {}))
   ([path headers]
-   (client/get (str base-url path)
+   (client/get path
                {:headers headers
                 :accept :json
                 :as :json
@@ -16,7 +14,7 @@
 (defn http-post
   ([path body] (http-post path {} body))
   ([path headers body]
-   (client/post (str base-url path)
+   (client/post path
                 {:headers headers
                  :form-params body
                  :content-type :json
@@ -27,7 +25,7 @@
 (defn http-put
   ([path body] (http-put path {} body))
   ([path headers body]
-   (client/put (str base-url path)
+   (client/put path
                {:headers headers
                 :form-params body
                 :content-type :json
@@ -39,7 +37,7 @@
 (defn http-delete
   ([path] (http-delete path {}))
   ([path headers]
-   (client/delete (str base-url path)
+   (client/delete path
                   {:headers headers
                    :accept :json
                    :as :json
