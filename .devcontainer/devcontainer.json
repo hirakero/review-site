@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.241.1/containers/clojure
 {
-	"name": "Isomorphic Clojure Webapp",
+	"name": "Isomorphic Clojure Webapp(Rename me in devcontainer.json)",
 	"dockerComposeFile": [
 		"../docker-compose.yml",
 		"./docker-compose.devcontainer.yml"
@@ -19,7 +19,10 @@
 			"extensions": [
 				"betterthantomorrow.calva",
 				"MS-CEINTL.vscode-language-pack-ja",
-				"vscjava.vscode-java-pack"
+				"vscjava.vscode-java-pack",
+				"MS-vsliveshare.vsliveshare",
+				"mtxr.sqltools",
+				"mtxr.sqltools-driver-pg"
 			]
 		}
 	},

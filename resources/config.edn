@@ -84,6 +84,11 @@
 
   :isomorphic-clojure-webapp.ui.boundary.web/host {:url "http://localhost:3000"}
 
+  :duct.router.swagger/ui {:enabled? #ig/ref [:duct/const :duct.router.swagger/enabled?]}
+  :duct.router.swagger/json {:enabled? #ig/ref [:duct/const :duct.router.swagger/enabled?]}
+
+  [:duct/const :duct.router.swagger/enabled?] false
+
   :isomorphic-clojure-webapp.ui.handler.common/top {:host #ig/ref :isomorphic-clojure-webapp.ui.boundary.web/host}
   :isomorphic-clojure-webapp.ui.handler.common/about {}
   :isomorphic-clojure-webapp.ui.handler.common/contact {}
