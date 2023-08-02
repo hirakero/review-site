@@ -41,4 +41,4 @@
     (let [result (products/delete-product db (:product-id path-params))]
       (if (empty? result)
         (rres/not-found {:error "resource-not-found"})
-        {:status 204}))))
+        (rres/status 204)))))
