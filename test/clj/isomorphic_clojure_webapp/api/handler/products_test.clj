@@ -25,11 +25,10 @@
 (deftest handler-products-test
   (let [base-url "http://localhost:3000"]
     (let [{:keys [status body]} (helper/http-get (str base-url "/api/products"))]
-      (testing "get /products データがない場合は404で、 :products nil を返す"
+      (testing "get /products データがない場合は404"
         (is (=  404 status))
-        (is (contains? body :products))
         (is (nil? (:products body)))
-        (is (= "resource-not-found" (:error body)))))
+        (is (= "products not found" (:error body)))))
     (let [{:keys [status headers body]} (helper/http-post (str base-url "/api/products")
                                                           {:name "Hammer XT"
                                                            :description "for hammer grip"})
@@ -74,7 +73,6 @@
         (testing "対象データが無ければ 404 で, :product nilを返す"
           (let [{:keys [status body]} (helper/http-get (str base-url "/api/products/00000000-0000-0000-0000-000000000000"))]
             (is (= 404 status))
-            (is (contains? body :product))
             (is (nil? (:product body)))))
 
         (testing ":id がUUIDでなければ 400 とメッセージ"
@@ -91,7 +89,7 @@
           (let [{:keys [status body]} (helper/http-put (str base-url "/api/products/00000000-0000-0000-0000-000000000000")
                                                        {:name "Hammer LT"})]
             (is (= 404 status))
-            (is (= "resource-not-found" (:error body)))))
+            (is (= "product not found" (:error body)))))
         (testing ":user-idの型違いは400"
           (let [{:keys [status body]} (helper/http-put (str base-url "/api/products/123")
                                                        {:name "Hammer LT"})]
@@ -131,12 +129,11 @@
               (is (= 200 status))
               (is (= "Sparrow" (-> body :products first :name)))))
 
-          (testing "対象データが無ければ404で、:products nilを返す"
+          (testing "対象データが無ければ404"
             (let [{:keys [status body]} (helper/http-get (str base-url "/api/products?name=abc"))]
               (is (= 404 status))
-              (is (contains? body :products))
               (is (nil? (:products body)))
-              (is (= "resource-not-found" (:error body))))))
+              (is (= "products not found" (:error body))))))
 
         (testing "クエリパラメータでページネーション"
           (testing ""

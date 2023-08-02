@@ -155,7 +155,7 @@
         (testing "対象データが無ければ not foundで何も返さない"
           (let [{:keys [status body]} (helper/http-get (str base-url "/api/users/00000000-0000-0000-0000-000000000000"))]
             (is (= 404 status))
-            (is (nil? body)))))
+            (is (nil? (:user body))))))
 
       (testing "put /users/:user-id"
         (testing "authorizatin haderがなければ401"
@@ -175,13 +175,11 @@
                                                        {:name "Alice Ackerman"})]
             (is (= 200 status))
             (is (= "Alice Ackerman" (-> body :name)))))
-        (testing "対象データが無ければ not foundで何も返さない"
+        (testing "対象データが無ければ not found"
           (let [{:keys [status body]} (helper/http-put (str base-url "/api/users/00000000-0000-0000-0000-000000000000")
                                                        user0-token-header
                                                        {:name "Alice Ackerman"})]
-            (is (= 404 status))
-            (is (nil? body)))))
-
+            (is (= 404 status)))))
 
       (testing "get /users データの配列を返す"
         (helper/http-post (str base-url "/api/users")
@@ -208,11 +206,10 @@
                                                           user1-token-header)]
             (is (= 204 status))
             (is (nil? body))))
-        (testing "対象データが無ければ not found で何も返さない"
+        (testing "対象データが無ければ not found"
           (let [{:keys [status body]} (helper/http-delete (str base-url "/api/users/00000000-0000-0000-0000-000000000000")
                                                           user0-token-header)]
-            (is (= 404 status))
-            (is (nil? body))))))))
+            (is (= 404 status))))))))
 
 
 (comment

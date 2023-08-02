@@ -11,7 +11,7 @@
          {:return-keys true
           :builder-fn rs/as-unqualified-maps})
       (catch SQLException e
-        (throw (ex-info (str "database error" (.getMessage e)) {:query sql} e))))))
+        (throw (ex-info (str "database error: " (.getMessage e)) {:query sql} e))))))
 
 (defn execute-one! [sql db]
   (exec jdbc/execute-one! sql db))
