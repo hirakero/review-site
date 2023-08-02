@@ -40,10 +40,13 @@
               ["/delete/:user-id" {:get #ig/ref :isomorphic-clojure-webapp.ui.handler.users/delete
                                    :post #ig/ref :isomorphic-clojure-webapp.ui.handler.users/delete-post}]]]
 
-            ["/api" {:middleware [#ig/ref :duct.middleware.buddy/authentication]}
+            ["/api" {:middleware [#ig/ref :duct.middleware.buddy/authentication
+                                  #ig/ref :isomorphic-clojure-webapp.api.exception-handler/wrap-exception-handler]}
              ["/health" {:get {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.app/health}}]
              ["/health-auth" {:get {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.app/health
                                     :middleware [#ig/ref :isomorphic-clojure-webapp.api.auth/wrap-user-only]}}]
+             ["/exception" {:get {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.app/exception
+                                  #_#_:middleware [#ig/ref :isomorphic-clojure-webapp.api.exception-handler/wrap-exception-handler]}}]
              ["/users"
               ["" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.users/list
                    :post {:handler #ig/ref :isomorphic-clojure-webapp.api.handler.users/create
@@ -115,9 +118,11 @@
 
   :isomorphic-clojure-webapp.api.auth/wrap-user-only {}
   :isomorphic-clojure-webapp.api.auth/wrap-admin-only {}
+  :isomorphic-clojure-webapp.api.exception-handler/wrap-exception-handler {}
 
   :isomorphic-clojure-webapp.api.handler.app/index {}
   :isomorphic-clojure-webapp.api.handler.app/health {}
+  :isomorphic-clojure-webapp.api.handler.app/exception {}
 
   :isomorphic-clojure-webapp.api.handler.users/list {:db #ig/ref :duct.database.sql/hikaricp}
   :isomorphic-clojure-webapp.api.handler.users/create {:db #ig/ref :duct.database.sql/hikaricp}
