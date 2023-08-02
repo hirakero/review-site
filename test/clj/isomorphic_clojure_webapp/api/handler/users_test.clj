@@ -126,7 +126,8 @@
     (testing "get /users データがない場合は何も返さない"
       (let [{:keys [status body]} (helper/http-get (str base-url "/api/users"))]
         (is (=  404 status))
-        (is (nil? (:users body)))))
+        (is (nil? (:users body)))
+        (is (= "users not found" (:error body)))))
 
     (let [{:keys [status headers body]} (helper/http-post (str base-url "/api/users")
                                                           {:name "Alice"
@@ -155,19 +156,22 @@
         (testing "対象データが無ければ not foundで何も返さない"
           (let [{:keys [status body]} (helper/http-get (str base-url "/api/users/00000000-0000-0000-0000-000000000000"))]
             (is (= 404 status))
-            (is (nil? (:user body))))))
+            (is (nil? (:user body)))
+            (is (= "user not found" (:error body))))))
 
       (testing "put /users/:user-id"
         (testing "authorizatin haderがなければ401"
           (let [{:keys [status body]} (helper/http-put (str base-url "/api/users/" user1-id)
                                                        {:name "Alice Ackerman"})]
-            (is (= 401 status))))
+            (is (= 401 status))
+            (is (= "login user only" (:error body)))))
 
         (testing "他のユーザーは変更できない403"
           (let [{:keys [status body]} (helper/http-put (str base-url "/api/users/" user1-id)
                                                        user2-token-header
                                                        {:name "Alice Ackerman"})]
-            (is (= 403 status))))
+            (is (= 403 status))
+            (is (= "owner only" (:error body)))))
 
         (testing "更新した内容を直接返す"
           (let [{:keys [status body]} (helper/http-put (str base-url "/api/users/" user1-id)
@@ -179,7 +183,8 @@
           (let [{:keys [status body]} (helper/http-put (str base-url "/api/users/00000000-0000-0000-0000-000000000000")
                                                        user0-token-header
                                                        {:name "Alice Ackerman"})]
-            (is (= 404 status)))))
+            (is (= 404 status))
+            (is (= "user not found" (:error body))))))
 
       (testing "get /users データの配列を返す"
         (helper/http-post (str base-url "/api/users")
@@ -195,12 +200,14 @@
         (testing "authorizatin haderがなければ401"
           (let [{:keys [status body]} (helper/http-delete (str base-url "/api/users/" user1-id)
                                                           {:name "Alice Ackerman"})]
-            (is (= 401 status))))
+            (is (= 401 status))
+            (is (= "login user only" (:error body)))))
 
         (testing "他のユーザーは変更できない403"
           (let [{:keys [status body]} (helper/http-delete (str base-url "/api/users/" user1-id)
                                                           user2-token-header)]
-            (is (= 403 status))))
+            (is (= 403 status))
+            (is (= "owner only" (:error body)))))
         (testing "削除に成功したらno content で何も返さない"
           (let [{:keys [status body]} (helper/http-delete (str base-url "/api/users/" user1-id)
                                                           user1-token-header)]
@@ -209,7 +216,8 @@
         (testing "対象データが無ければ not found"
           (let [{:keys [status body]} (helper/http-delete (str base-url "/api/users/00000000-0000-0000-0000-000000000000")
                                                           user0-token-header)]
-            (is (= 404 status))))))))
+            (is (= 404 status))
+            (is (= "user not found" (:error body)))))))))
 
 
 (comment
@@ -244,7 +252,8 @@
                                                       {:name "alice"
                                                        :email "alice@example.com"
                                                        :password "password"})]
-          (is (= 409 status)))))
+          (is (= 409 status))
+          (is (= "user already exists" (:error body))))))
 
     (testing "サインイン"
       (testing "正常、ユーザー情報とトークンを返す。パスワードは返さない"

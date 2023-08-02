@@ -70,10 +70,11 @@
             (is (= 200 status))
             (is (= "Hammer XT" (-> body :product :name)))))
 
-        (testing "対象データが無ければ 404 で, :product nilを返す"
+        (testing "対象データが無ければ 404 "
           (let [{:keys [status body]} (helper/http-get (str base-url "/api/products/00000000-0000-0000-0000-000000000000"))]
             (is (= 404 status))
-            (is (nil? (:product body)))))
+            (is (nil? (:product body)))
+            (is (= "product not found" (:error body)))))
 
         (testing ":id がUUIDでなければ 400 とメッセージ"
           (let [{:keys [status body]} (helper/http-get (str base-url "/api/products/123"))]
@@ -85,7 +86,7 @@
           (let [{:keys [status body]} (helper/http-put (str base-url "/api/products/" id) {:name "Hammer LT"})]
             (is (= 200 status))
             (is (= "Hammer LT" (-> body :name)))))
-        (testing "対象データが無ければ404で、 :error \"not found\" を返す"
+        (testing "対象データが無ければ404、 :error \"not found\" を返す"
           (let [{:keys [status body]} (helper/http-put (str base-url "/api/products/00000000-0000-0000-0000-000000000000")
                                                        {:name "Hammer LT"})]
             (is (= 404 status))
@@ -164,7 +165,7 @@
         (testing "対象データが無ければ 404で、:error \"not found\" を返す"
           (let [{:keys [status body]} (helper/http-delete (str base-url "/api/products/00000000-0000-0000-0000-000000000000"))]
             (is (= 404 status))
-            (is (= "resource-not-found" (:error body)))))
+            (is (= "product not found" (:error body)))))
 
         (testing ":product-idの型が違っていれば400"
           (let [{:keys [status body]} (helper/http-delete (str base-url "/api/products/123"))]

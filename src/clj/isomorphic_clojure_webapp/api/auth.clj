@@ -3,7 +3,8 @@
             [buddy.auth.middleware :refer [wrap-authentication]]
             [buddy.sign.jwt :as jwt]
             [buddy.auth :as buddy]
-            [integrant.core :as ig]))
+            [integrant.core :as ig]
+            [ring.util.http-response :as res]))
 
 (def secret-key "SECRET-KEY") ;TODO  環境変数から
 (def exp-second 3600)
@@ -28,7 +29,7 @@
   (fn [handler]
     (fn [req]
       (if-not (buddy/authenticated? req)
-        {:status 401 :body {:error "unaudorized"}}
+        (res/unauthorized {:error "login user only"})
         (handler req)))))
 
 (defmethod  ig/init-key ::wrap-admin-only [_ _]
@@ -39,7 +40,7 @@
                          :role)]
         (if (= role :admin)
           (handler req)
-          {:status 401 :body {:error "unaudorized"}})))))
+          (res/unauthorized {:error "admin only"}))))))
 
 ;wrap-users-owner-only
 ;wrap-reviews-owner-only

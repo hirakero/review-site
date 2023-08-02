@@ -21,6 +21,7 @@
   (def base-url "http://localhost:3000"))
 (deftest handler-reviews-test
   (let [base-url "http://localhost:3000"]
+
     (let [;正規ユーザー追加
           {{user1-id :id}  :body} (helper/http-post (str base-url "/api/users")
                                                     {:name "Chris"
@@ -92,7 +93,8 @@
                                                         {:title "awsome"
                                                          :content "tons of pros ..."
                                                          :rate 5})]
-            (is (= 401 status))))
+            (is (= 401 status))
+            (is (= "login user only" (:error body)))))
         (testing "フィールドが足りない場合は 400"
           (let [{:keys [status body]} (helper/http-post (str base-url "/api/products/" product1-id "/reviews")
                                                         user1-token-header
@@ -106,16 +108,17 @@
                                                          :content ""
                                                          :rate "good!"})]
             (is (= 400 status))))
-        (testing "ユーザーが存在しない 404?"
-          ;そもそもtokenが発行されないはず？ ;ログイン後にユーザー削除の可能性も？
+        (testing "ユーザーが存在しない 404"
+          ;そもそもtokenが発行されないはず？ ;ログイン後にユーザー削除の可能性も？ 
           )
-        (testing "product が存在しない 404?"
+        (testing "product が存在しない 404"
           (let [{:keys [status body]} (helper/http-post (str base-url "/api/products/" "00000000-0000-0000-0000-000000000000" "/reviews")
                                                         user1-token-header
                                                         {:title "awsome"
                                                          :content "tons of pros ..."
                                                          :rate 5})]
-            (is (= 404 status)))))
+            (is (= 404 status))
+            (is (= "product not found" (:error body))))))
 
       (helper/http-post (str base-url "/api/products/" product1-id "/reviews")
                         user2-token-header
@@ -144,13 +147,15 @@
               (let [review (-> body :reviews first)]
                 (is (string? (:user-name review)))))))
 
-        (testing "レビューがなければ404"
-          (let [{:keys [status body]} (helper/http-get (str base-url "/api/products/" product3-id "/reviews"))]
-            (is (= 404 status))))
-
         (testing "商品がなければ 404"
           (let [{:keys [status body]} (helper/http-get (str base-url "/api/products/" "00000000-0000-0000-0000-000000000000" "/reviews"))]
-            (is (= 404 status)))))
+            (is (= 404 status))
+            (is (= "product not found" (:error body)))))
+
+        (testing "レビューがなければ404"
+          (let [{:keys [status body]} (helper/http-get (str base-url "/api/products/" product3-id "/reviews"))]
+            (is (= 404 status))
+            (is (= "reviews not found" (:error body))))))
 
 
       (testing " get /users/:user-id/reviews"
@@ -164,13 +169,15 @@
               (let [review (-> body :reviews first)]
                 (is (string? (:product-name review)))))))
 
-        (testing "レビューがなければ404"
-          (let [{:keys [status body]} (helper/http-get (str base-url "/api/users/" user3-id "/reviews"))]
-            (is (= 404 status))))
-
         (testing "ユーザーがなければ 404"
           (let [{:keys [status body] :as result} (helper/http-get (str base-url "/api/users/" "00000000-0000-0000-0000-000000000000" "/reviews"))]
-            (is (= 404 status)))))
+            (is (= 404 status))
+            (is (= "user not found" (:error body)))))
+
+        (testing "レビューがなければ404"
+          (let [{:keys [status body]} (helper/http-get (str base-url "/api/users/" user3-id "/reviews"))]
+            (is (= 404 status))
+            (is (= "reviews not found" (:error body))))))
 
       (testing "get /reviews/:review-id"
         (testing "取得した内容を返す :review {,,,}"
@@ -214,12 +221,14 @@
       (testing "delete"
         (testing "認証なしは401"
           (let [{:keys [status body]} (helper/http-delete (str base-url "/api/reviews/" review-p1u1-id))]
-            (is (= 401 status))))
+            (is (= 401 status))
+            (is (= "login user only" (:error body)))))
 
         (testing "本人以外は消せない 403"
           (let [{:keys [status body]} (helper/http-delete (str base-url "/api/reviews/" review-p1u1-id)
                                                           user2-token-header)]
-            (is (= 403 status))))
+            (is (= 403 status))
+            (is (= "owner only" (:error body)))))
 
         #_(helper/http-delete (str "/api/reviews/" "00000000-0000-0000-0000-000000000000")
                               {"authorization" (str "Token " "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOm51bGwsIm5hbWUiOiJjaHJpcyIsImV4cCI6MTY4OTIzMjIzOH0.ke_IHSWje7T3HySP87PqZDDhHtXqI1KIhi1DUiuXVL8")})
@@ -227,7 +236,8 @@
         (testing "対象データが無ければ 404"
           (let [{:keys [status body]} (helper/http-delete (str base-url "/api/reviews/" "00000000-0000-0000-0000-000000000000")
                                                           user1-token-header)]
-            (is (= 404 status))))
+            (is (= 404 status))
+            (is (= "review not found" (:error body)))))
 
         (testing ":review-id  無しは405"
           (let [{:keys [status body]} (helper/http-delete (str base-url "/api/reviews")

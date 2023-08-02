@@ -20,7 +20,7 @@
         (res/not-found {:error "product not found"})
         (let [reviews (reviews/get-reviews-by-product db product-id)]
           (if (empty? reviews)
-            (res/not-found {:error "review not found"})
+            (res/not-found {:error "reviews not found"})
             (res/ok {:reviews reviews})))))))
 
 
@@ -32,7 +32,7 @@
         (res/not-found {:error "user not found"})
         (let [reviews (reviews/get-reviews-by-user db user-id)]
           (if (empty? reviews)
-            (res/not-found {:error "review not found"})
+            (res/not-found {:error "reviews not found"})
             (res/ok {:reviews reviews})))))))
 
 
