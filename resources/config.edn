@@ -12,7 +12,7 @@
 
   :duct.middleware.buddy/authentication
   {:backend :jws
-   :secret "SECRET-KEY" #_#duct/env "SECRET-KEY"}
+   :secret #duct/env "SECRET_KEY"}
 
   :duct.router/reitit
   {:routes [#_["/" {:get #ig/ref :isomorphic-clojure-webapp.api.handler.app/index}]

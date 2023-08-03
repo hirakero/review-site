@@ -6,7 +6,7 @@
             [integrant.core :as ig]
             [ring.util.http-response :as res]))
 
-(def secret-key "SECRET-KEY") ;TODO  環境変数から
+(def secret-key (duct.core.env/env "SECRET_KEY"))
 (def exp-second 3600)
 
 (defn create-token
