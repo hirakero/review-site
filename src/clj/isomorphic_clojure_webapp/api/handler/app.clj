@@ -14,9 +14,13 @@
                           [:script {:src "/js/main.js"}]]])}))
 
 
-(defmethod ig/init-key ::health [_a _b]
+(defmethod ig/init-key ::health [_ _]
   (fn [req]
     {:status 200
      :headers {"content-type" "text/json"}
      :body {:message "running!"
             :token (:identity req)}}))
+
+(defmethod ig/init-key ::exception [_ _]
+  (fn [req]
+    (throw (ex-info "ex info" {:error "error test"}))))
