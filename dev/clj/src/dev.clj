@@ -2,6 +2,8 @@
   (:refer-clojure :exclude [test])
   (:require [clojure.repl :refer :all]
             [fipp.edn :refer [pprint]]
+            [cljstyle.task.fix :as formatter]
+            [clj-kondo.core :as linter]
             [clojure.tools.namespace.repl :refer [refresh]]
             [clojure.java.io :as io]
             [duct.core :as duct]
@@ -9,12 +11,11 @@
             [eftest.runner :as eftest]
             [integrant.core :as ig]
             [integrant.repl :refer [clear halt go init prep reset]]
-            [integrant.repl.state :refer [config system]]))
+            [integrant.repl.state :refer [config system]]
+            [isomorphic-clojure-webapp.loader :refer [read-config]]))
 
 (duct/load-hierarchy)
 
-(defn read-config []
-  (duct/read-config (io/resource "config.edn")))
 
 (defn test
   ([]
@@ -26,6 +27,18 @@
    (eftest/run-tests tests
                      {:capture-output? false
                       :multithread? false})))
+
+(defn format:fix
+  []
+  (formatter/task ["src" "test"])
+  nil)
+
+
+(defn lint:check
+  []
+  (-> (linter/run! {:lint ["src" "test"]})
+      linter/print!))
+
 
 (def profiles
   [:duct.profile/dev :duct.profile/local])
