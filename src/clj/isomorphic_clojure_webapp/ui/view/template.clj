@@ -2,30 +2,27 @@
 
 (defn template [& body]
   [[:header
-    [:h1 "reviews.com"]
-    [:div.pure-g
-     [:div.pure-u-7-8
-      [:div.pure-menu.pure-menu-horizontal
-       [:div.pure-menu-heading "menu"]
-       [:ul.pure-menu-list
-        [:li.pure-menu-item
-         [:a.pure-menu-link {:href "/"} "main"]]
-        [:li.pure-menu-item
-         [:a.pure-menu-link {:href "/about"} "about"]]
-        [:li.pure-menu-item
-         [:a.pure-menu-link {:href "/contact"} "contact"]]]]]
-     [:a.pure-u-1-8.pure-button {:href "/users/signin"} "signin"]]
-
-    [:div.pure-g
-     [:div.pure-u-1-4]
-     [:form.pure-u-1-2 {:method :get :action ""}
-      [:div.pure-g
-       [:input.pure-u-5-8 {:type :text :id "q" :name "q"}]
-       [:div.pure-u-1-8]
-       [:button.pure-u-1-4 {:type :submit} "search"]]]
-     [:div.pure-u-2-8]]]
+    [:div.navbar
+     [:div.navbar-brand
+      [:div.navbar-item.is-size-3 [:a {:href "/"} "reviews.com"]]]
+     [:div.navbar-menu
+      [:div.navbar-start
+       [:div.navbar-item [:a {:href "/"} "home"]]
+       [:div.navbar-item [:a {:href "/about"} "about"]]
+       [:div.navbar-item [:a {:href "/contact"} "contact"]]]
+      [:div.navbar-end
+       [:div.navbar-item
+        [:form {:method :get :action ""}
+         [:div.field.has-addons
+          [:div.control
+           [:input.input {:type :text :name "search" :placeholder "product name etc"}]]
+          [:div.control
+           [:a.button.is-info [:i.fa.fa-search] "search"]
+           #_[:button.column.is-2 {:type :submit} "search"]]]]]
+       [:div.navbar-item
+        [:a {:href "/users/signin"} [:i.fa.fa-user] "signin"]]]]]]
 
    [:div.main body]
-   [:footer
-    [:div.pure-g
-     [:divr.pure-u-1 "reviews.com"]]]])
+   [:footer.footer
+    [:div.container
+     [:div.content.has-text-centered "reviews.com"]]]])

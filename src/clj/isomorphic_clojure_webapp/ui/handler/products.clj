@@ -1,13 +1,14 @@
 (ns isomorphic-clojure-webapp.ui.handler.products
   (:require [integrant.core :as ig]
-            [isomorphic-clojure-webapp.ui.response :refer [ok see-other]]
-            [isomorphic-clojure-webapp.ui.boundary.products :as products]))
+            [isomorphic-clojure-webapp.ui.response :refer [ok]]
+            [isomorphic-clojure-webapp.ui.boundary.products :as products]
+            [ring.util.http-response :as res]))
 
 
 (defmethod ig/init-key ::list [_ {:keys [host]}]
   (fn [{qp :query-params}]
     (let [{:keys [status body]}  (products/get-products host qp)]
-      (ok [:h2 "product list"]
+      (ok [:h2 "product list"] ;TODO viewへ移動
           [:a {:href "/products/create"} "create"]
           [:ul (for [{:keys [name id]} (:products body)]
                  [:li [:a {:href (str "/products/detail/" id)} name]])]))))
@@ -63,7 +64,7 @@
     (let [{:strs [name description]} form-params]
       (let [{:keys [status]} (products/create-product host form-params)]
         (if (= status 201)
-          (see-other (str "/products"))
+          (res/see-other (str "/products"))
           (ok [:h2  "product create"]
               [:div "error"]))))))
 
@@ -86,7 +87,7 @@
   (fn [{:keys [form-params path-params]}]
     (let [{:keys [status body]}  (products/update-product host (:product-id path-params) form-params)]
       (if (= status 200)
-        (see-other (str "/products"))
+        (res/see-other (str "/products"))
         (ok [:h2  "product edit"]
             [:div "error"])))))
 
@@ -109,6 +110,10 @@
   (fn [{:keys [path-params]}]
     (let [{:keys [status]} (products/delete-product host (:product-id path-params))]
       (if (= 204 status)
-        (see-other (str "/products"))
+        (res/see-other (str "/products"))
         (ok [:h2 "product delete post"]
             [:div "error"])))))
+
+
+#_(defn get-new-products [host item-count]
+    (let [products (products/get-products host {:limit 5})]))
