@@ -4,7 +4,7 @@
   [[:header
     [:div.navbar
      [:div.navbar-brand
-      [:div.navbar-item.is-size-3 [:a {:href "/"} "review site"]]]
+      [:div.navbar-item.is-size-3 [:a {:href "/"} "reviews.com"]]]
      [:div.navbar-menu
       [:div.navbar-start
        [:div.navbar-item [:a {:href "/"} "home"]]
@@ -23,6 +23,6 @@
         [:a {:href "/users/signin"} [:i.fa.fa-user] "signin"]]]]]]
 
    [:div.main body]
-   [:footer
-    [:div.columns
-     [:div "reviews.com"]]]])
+   [:footer.footer
+    [:div.container
+     [:div.content.has-text-centered "reviews.com"]]]])
