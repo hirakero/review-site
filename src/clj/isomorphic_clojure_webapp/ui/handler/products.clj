@@ -8,7 +8,7 @@
 (defmethod ig/init-key ::list [_ {:keys [host]}]
   (fn [{qp :query-params}]
     (let [{:keys [status body]}  (products/get-products host qp)]
-      (ok [:h2 "product list"]
+      (ok [:h2 "product list"] ;TODO viewへ移動
           [:a {:href "/products/create"} "create"]
           [:ul (for [{:keys [name id]} (:products body)]
                  [:li [:a {:href (str "/products/detail/" id)} name]])]))))
